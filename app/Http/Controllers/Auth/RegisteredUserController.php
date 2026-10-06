@@ -34,6 +34,8 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'company_name' => 'required|string|max:255',
+            'phone' => ['required', 'string', 'max:20', 'regex:/^(\+?\d{1,3}[- ]?)?\d{10,11}$/'],
+            'shipping_address' => 'required|string|max:500',
             'email' => [
                 'required',
                 'string',
@@ -51,11 +53,15 @@ class RegisteredUserController extends Controller
                 },
             ],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'phone.regex' => 'Please enter a valid phone number (e.g. 09123456789 or +639123456789).',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'company_name' => $request->company_name,
+            'phone' => $request->phone,
+            'shipping_address' => $request->shipping_address,
             'role' => 'client',
             'credit_status' => 'pending',
             'email' => $request->email,

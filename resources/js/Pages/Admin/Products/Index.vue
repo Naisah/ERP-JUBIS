@@ -4,7 +4,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import debounce from 'lodash/debounce';
 import { 
-    PlusIcon, 
+    PlusIcon, DocumentTextIcon, 
     MagnifyingGlassIcon,
     PencilSquareIcon,
     TrashIcon,
@@ -43,6 +43,7 @@ const deleteProduct = (id) => {
 };
 
 const getStockBadge = (product) => {
+    if (product.variants_count > 0) return { label: 'Master Container', classes: 'bg-purple-100 text-purple-800 border-purple-200' };
     if (product.stock_quantity <= 0) {
         return { label: 'Out of Stock', classes: 'bg-red-100 text-red-800 border-red-200' };
     } else if (product.stock_quantity <= (product.reorder_level || 10)) {
@@ -73,12 +74,12 @@ const totalValue = computed(() => {
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Low Stock Alerts</p>
                 <p class="text-2xl font-extrabold text-amber-600 mt-1">
                     <ExclamationTriangleIcon class="w-5 h-5 inline -mt-1 mr-1" />
-                    {{ products.data?.filter(p => p.stock_quantity > 0 && p.stock_quantity <= (p.reorder_level || 10)).length || 0 }}
+                    {{ products.data?.filter(p => !p.variants_count && p.stock_quantity > 0 && p.stock_quantity <= (p.reorder_level || 10)).length || 0 }}
                 </p>
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 cursor-pointer hover:ring-2 hover:ring-red-300 transition" @click="applyStockFilter('out')">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Out of Stock</p>
-                <p class="text-2xl font-extrabold text-red-600 mt-1">{{ products.data?.filter(p => p.stock_quantity <= 0).length || 0 }}</p>
+                <p class="text-2xl font-extrabold text-red-600 mt-1">{{ products.data?.filter(p => !p.variants_count && p.stock_quantity <= 0).length || 0 }}</p>
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Page Inventory Value</p>
@@ -105,6 +106,7 @@ const totalValue = computed(() => {
                     </div>
                 </div>
                 
+                <a :href="route('admin.products.export')" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-bold text-gray-700 bg-white hover:bg-gray-50 mr-3 transition-colors"><DocumentTextIcon class="h-5 w-5 mr-2 text-gray-400" />Export CSV</a>
                 <Link :href="route('admin.products.create')" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-jubis-navy hover:bg-[#071126] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-jubis-navy transition-colors">
                     <PlusIcon class="h-5 w-5 mr-2" />
                     Add New Product
@@ -151,7 +153,8 @@ const totalValue = computed(() => {
                                 ₱{{ Number(product.wholesale_price).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-center">
-                                <div class="text-sm font-bold" :class="product.stock_quantity <= 0 ? 'text-red-600' : product.stock_quantity <= (product.reorder_level || 10) ? 'text-amber-600' : 'text-gray-900'">
+                                <div v-if="product.variants_count > 0" class="text-sm font-bold text-gray-400 italic">N/A</div>
+                                <div v-else class="text-sm font-bold" :class="product.stock_quantity <= 0 ? 'text-red-600' : product.stock_quantity <= (product.reorder_level || 10) ? 'text-amber-600' : 'text-gray-900'">
                                     {{ product.stock_quantity }}
                                 </div>
                                 <div v-if="product.stock_quantity > 0 && product.stock_quantity <= (product.reorder_level || 10)" class="text-[10px] text-amber-500 font-medium mt-0.5">

@@ -37,7 +37,25 @@ class QuoteController extends Controller
             'status' => 'required|in:pending,reviewed,approved,rejected',
         ]);
 
+        $oldStatus = $quote->status;
         $quote->update(['status' => $validated['status']]);
+
+        // AUTOMATION: Stock Rollback on Rejection
+        if ($validated['status'] === 'rejected' && $oldStatus !== 'rejected') {
+            foreach ($quote->items as $item) {
+                if ($item->product) {
+                    $item->product->increment('stock_quantity', $item->quantity);
+                    \App\Models\StockMovement::create([
+                        'product_id' => $item->product_id,
+                        'user_id' => auth()->id(),
+                        'quantity' => $item->quantity,
+                        'type' => 'adjustment',
+                        'reference_id' => 'QUOTE-REJECT-' . $quote->id,
+                        'notes' => 'Stock restored due to rejected quote'
+                    ]);
+                }
+            }
+        }
 
         // Auto-generate invoice if approved
         if ($validated['status'] === 'approved') {

@@ -14,9 +14,32 @@ class WebhookController extends Controller
     public function handlePayMongo(Request $request)
     {
         $payload = $request->all();
+        $signatureHeader = $request->header('Paymongo-Signature');
+        
         Log::info('PayMongo Webhook Received: ', $payload);
+        Log::info('Signature Header: ' . $signatureHeader);
 
-        // Verify the webhook signature here in production
+        if ($signatureHeader && env('PAYMONGO_WEBHOOK_SECRET')) {
+            $secret = env('PAYMONGO_WEBHOOK_SECRET');
+            $parts = explode(',', $signatureHeader);
+            $timestamp = str_replace('t=', '', $parts[0] ?? '');
+            
+            // Extract the test or live signature depending on the environment
+            $signatureToMatch = '';
+            foreach ($parts as $part) {
+                if (str_starts_with($part, 'te=') || str_starts_with($part, 'li=')) {
+                    $signatureToMatch = substr($part, 3);
+                    break;
+                }
+            }
+
+            $computedSignature = hash_hmac('sha256', $timestamp . '.' . $request->getContent(), $secret);
+
+            if (!hash_equals($computedSignature, $signatureToMatch)) {
+                Log::error('PayMongo Webhook Signature Verification Failed');
+                return response()->json(['error' => 'Invalid signature'], 401);
+            }
+        }
 
         $event = $payload['data']['attributes']['type'] ?? null;
         
@@ -42,9 +65,32 @@ class WebhookController extends Controller
     /**
      * Mock Local Simulator for Testing without real API Keys
      */
-    public function simulatePayment(Request $request, $referenceId)
+    public function simulatePayment(Request $request, $id)
     {
-        $invoice = Invoice::where('payment_reference_id', $referenceId)->firstOrFail();
+        $invoice = Invoice::findOrFail($id);
+        
+        if ($invoice->status === 'paid') {
+            return redirect()->route('dashboard')->with('error', 'SECURITY ALERT: This invoice has already been paid and cannot be processed again.');
+        }
+
+        return view('mock-checkout', compact('invoice'));
+    }
+
+    public function processPayment(Request $request, $id)
+    {
+        $invoice = Invoice::findOrFail($id);
+        
+        if ($invoice->status === 'paid') {
+            return redirect()->route('dashboard')->with('error', 'SECURITY ALERT: This invoice has already been paid and cannot be processed again.');
+        }
+        
+        $method = $request->input('payment_method');
+        
+        if ($method === 'qrph') {
+            if ($invoice->payment_url) {
+                return redirect()->away($invoice->payment_url);
+            }
+        }
         
         $invoice->update([
             'status' => 'paid',

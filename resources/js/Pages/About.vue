@@ -79,7 +79,7 @@ const brands = [
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col md:flex-row justify-between items-center">
                 <h2 class="text-2xl font-bold mb-4 md:mb-0">Ready to source materials for your next project?</h2>
                 <div class="space-x-4">
-                    <a href="/register" class="inline-block bg-white text-jubis-red font-bold py-3 px-6 rounded shadow hover:bg-gray-100 transition">Apply for B2B Account</a>
+                    <a href="/register" class="inline-block bg-white text-jubis-red font-bold py-3 px-6 rounded shadow hover:bg-gray-100 transition">Apply for client account</a>
                     <a href="/contact" class="inline-block border-2 border-white text-white font-bold py-3 px-6 rounded hover:bg-white hover:text-jubis-red transition">Contact Us</a>
                 </div>
             </div>

@@ -142,15 +142,26 @@ const addToQuote = (productId) => {
                                                 <LockClosedIcon class="w-3 h-3 mr-1" />
                                                 Sign in for pricing
                                             </span>
-                                            <span v-else class="text-lg font-bold text-jubis-navy flex items-center">
+                                            <span v-else-if="Number(product.wholesale_price) > 0" class="text-lg font-bold text-jubis-navy flex items-center">
                                                 ₱{{ Number(product.wholesale_price).toLocaleString('en-PH', {minimumFractionDigits:2}) }}
+                                            </span>
+                                            <span v-else class="text-sm font-bold text-gray-500 italic flex items-center">
+                                                Volume Pricing
                                             </span>
                                         </div>
                                         
-                                        <button :disabled="!product.stock_quantity > 0" @click.prevent="product.stock_quantity > 0 ? addToQuote(product.id) : null" class="w-full flex items-center justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-jubis-navy hover:bg-[#071126] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-jubis-navy transition-colors" :class="{ 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400': !product.stock_quantity > 0 }">
-                                            <ShoppingCartIcon class="w-4 h-4 mr-2 stroke-2" />
-                                            {{ loadingId === product.id ? 'Adding...' : (product.stock_quantity > 0 ? 'Add to Quote' : 'Unavailable') }}
-                                        </button>
+                                        <div v-if="product.variants && product.variants.length > 0">
+                                            <Link :href="'/products/' + product.id" class="w-full flex items-center justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" /></svg>
+                                                Select Options
+                                            </Link>
+                                        </div>
+                                        <div v-else>
+                                            <button :disabled="!product.stock_quantity > 0" @click.prevent="product.stock_quantity > 0 ? addToQuote(product.id) : null" class="w-full flex items-center justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-jubis-navy hover:bg-[#071126] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-jubis-navy transition-colors" :class="{ 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400': !product.stock_quantity > 0 }">
+                                                <ShoppingCartIcon class="w-4 h-4 mr-2 stroke-2" />
+                                                {{ loadingId === product.id ? 'Adding...' : (product.stock_quantity > 0 ? 'Add to Quote' : 'Unavailable') }}
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </Link>

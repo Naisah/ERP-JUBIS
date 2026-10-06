@@ -75,7 +75,7 @@
                 <table style="width: 100%; text-align: right;">
                     <tr>
                         <td style="color: #64748b; padding-bottom: 5px;">Invoice No:</td>
-                        <td style="font-weight: bold; color: #0f172a; padding-bottom: 5px;">#{{ str_pad($invoice->id, 5, '0', STR_PAD_LEFT) }}</td>
+                        <td style="font-weight: bold; color: #0f172a; padding-bottom: 5px;">INV-{{ str_pad($invoice->quote_id, 5, '0', STR_PAD_LEFT) }}</td>
                     </tr>
                     <tr>
                         <td style="color: #64748b; padding-bottom: 5px;">Date Issued:</td>

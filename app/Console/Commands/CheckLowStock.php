@@ -45,10 +45,9 @@ class CheckLowStock extends Command
             $this->error($msg);
             Log::warning($msg);
             
-            // In a real production system with mail configured, we would do:
-            // Mail::to('purchasing@jubismarketing.com')->send(new LowStockAlertMail($item));
+            \Illuminate\Support\Facades\Mail::to('dwyanetjhung@gmail.com')->send(new \App\Mail\LowStockAlertMail($item));
         }
 
-        $this->info('Low stock check complete. Notifications logged for Purchasing Department.');
+        $this->info('Low stock check complete. Email sent to dwyanetjhung@gmail.com.');
     }
 }

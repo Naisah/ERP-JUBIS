@@ -34,7 +34,7 @@ const getStatusColor = (status) => {
                         </p>
                     </div>
                     <div class="mt-4 md:mt-0 flex items-center">
-                        <span class="text-sm text-gray-500 mr-3">B2B Account Status:</span>
+                        <span class="text-sm text-gray-500 mr-3">client account Status:</span>
                         <span class="px-3 py-1 bg-green-100 text-green-800 border border-green-200 rounded-full text-xs font-bold uppercase tracking-wider">
                             {{ $page.props.auth.user.credit_status || 'Active' }}
                         </span>
@@ -101,18 +101,43 @@ const getStatusColor = (status) => {
                                     <div class="text-right flex flex-col items-end">
                                         <div class="text-xs text-gray-500 font-medium uppercase mb-0.5">Estimated Total</div>
                                         <div class="text-lg font-bold text-gray-900">₱{{ Number(quote.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}</div>
-                                        <a v-if="quote.invoice && quote.invoice.status !== 'paid' && quote.invoice.payment_url" :href="quote.invoice.payment_url" class="mt-2 text-xs font-bold bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-full transition shadow-sm">
-                                            Pay via GCash/Card
-                                        </a>
+                                        <template v-if="quote.invoice && quote.invoice.status !== 'paid' && quote.invoice.status !== 'on_terms'">
+                                            <Link v-if="quote.items && quote.items.reduce((s, i) => s + i.quantity, 0) >= 1000" 
+                                                :href="'/api/invoices/' + quote.invoice.id + '/accept-terms'" 
+                                                method="post" as="button" type="button" @click="e => { if (!confirm('Are you sure you want to commit to these Net-30 financial terms? This is a legally binding B2B agreement.')) e.preventDefault(); }"
+                                                class="mt-2 text-xs font-bold bg-jubis-navy hover:bg-[#071126] text-white px-4 py-1.5 rounded-full transition shadow-sm w-full text-center">
+                                                Accept Credit Terms
+                                            </Link>
+                                            <a v-else-if="quote.invoice.payment_url" :href="'/api/mock/payment/invoice/' + quote.invoice.id" class="mt-2 text-xs font-bold bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-full transition shadow-sm w-full text-center inline-block">
+                                                Pay via GCash/Card
+                                            </a>
+                                        </template>
+                                        <div v-else-if="quote.invoice && quote.invoice.status === 'on_terms'" class="mt-2 text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200 px-4 py-1.5 rounded-full shadow-sm text-center">
+                                            ON CREDIT (NET-30)
+                                        </div>
                                         <a v-if="quote.invoice" :href="'/invoices/' + quote.invoice.id + '/pdf'" target="_blank" class="mt-2 text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full transition shadow-sm flex items-center justify-center">
                                               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                               </svg>
                                               Download PDF Invoice
                                           </a>
-                                          <span v-else-if="quote.invoice && quote.invoice.status === 'paid'" class="mt-2 text-xs font-bold text-green-600 flex items-center">
+                                          <span v-if="quote.invoice && quote.invoice.status === 'paid'" class="mt-2 text-xs font-bold text-green-600 flex items-center">
                                             <CheckCircleIcon class="w-4 h-4 mr-1" /> Payment Complete
                                         </span>
+                                        
+                                        <!-- Tracking Information -->
+                                        <div v-if="quote.invoice && quote.invoice.shipments && quote.invoice.shipments.length > 0" class="mt-3 flex flex-col items-end w-full">
+                                            <div v-for="shipment in quote.invoice.shipments" :key="shipment.id" class="text-xs bg-blue-50 border border-blue-100 text-blue-800 px-3 py-1.5 rounded-lg w-full mb-1 flex justify-between items-center">
+                                                <span class="font-bold flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor"><path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" /><path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1v-4h3.586a1 1 0 00.707-.293l2.414-2.414a1 1 0 00.293-.707V9a1 1 0 00-1-1h-4a1 1 0 00-1 1v4H11V5a1 1 0 00-1-1H3z" /></svg>
+                                                    {{ shipment.status.toUpperCase() }}
+                                                </span>
+                                                <a v-if="shipment.tracking_url" :href="shipment.tracking_url" target="_blank" class="font-mono text-blue-600 hover:underline flex items-center">
+                                                    {{ shipment.tracking_number }} <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-0.5" viewBox="0 0 20 20" fill="currentColor"><path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" /><path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" /></svg>
+                                                </a>
+                                                <span v-else class="font-mono font-medium">{{ shipment.tracking_number || shipment.carrier }}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

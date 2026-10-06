@@ -1,0 +1,1 @@
+<?php namespace App\Http\Controllers\Admin; use App\Http\Controllers\Controller; use Illuminate\Http\Request; use Inertia\Inertia; use App\Models\RMA; class RMAController extends Controller { public function index() { $rmas = RMA::with(["user", "invoice"])->orderBy("created_at", "desc")->paginate(20); return Inertia::render("Admin/RMAs/Index", ["rmas" => $rmas]); } }

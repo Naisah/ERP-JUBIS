@@ -29,6 +29,7 @@ const allNavigation = [
     { name: 'Logistics & Dispatch', href: route('admin.shipments.index'), icon: TruckIcon, current: route().current('admin.shipments.*'), roles: ['warehouse', 'purchasing'] },
     { name: 'User Management', href: route('admin.users.index'), icon: UsersIcon, current: route().current('admin.users.*'), roles: [] },
     { name: 'Reports & Analytics', href: route('admin.reports.index'), icon: ChartBarIcon, current: route().current('admin.reports.*'), roles: ['finance'] },
+    { name: 'Returns / RMAs', href: route('admin.rmas.index'), icon: DocumentTextIcon, current: route().current('admin.rmas.*'), roles: ['finance', 'warehouse', 'sales'] },
     { name: 'Settings', href: route('admin.settings'), icon: Cog6ToothIcon, current: route().current('admin.settings'), roles: [] },
 ];
 

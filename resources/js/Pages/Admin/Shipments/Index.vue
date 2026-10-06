@@ -51,7 +51,7 @@ const updateStatus = (id, newStatus) => {
                             <div class="text-xs text-gray-500">via {{ shipment.carrier }}</div>
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-gray-900">
-                            <div class="font-medium text-jubis-navy">INV-{{ String(shipment.invoice_id).padStart(5, '0') }}</div>
+                            <div class="font-medium text-jubis-navy">INV-{{ String(shipment.invoice.quote_id).padStart(5, '0') }}</div>
                         </td>
                         <td class="px-3 py-4 text-gray-900 max-w-xs truncate">
                             <div class="font-bold">{{ shipment.invoice?.user?.company_name || shipment.invoice?.user?.name }}</div>

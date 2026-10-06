@@ -2,11 +2,13 @@
 import { ref } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
-import { UserIcon, EnvelopeIcon, LockClosedIcon, BuildingOfficeIcon, EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
+import { UserIcon, EnvelopeIcon, LockClosedIcon, BuildingOfficeIcon, EyeIcon, EyeSlashIcon, PhoneIcon, MapPinIcon } from '@heroicons/vue/24/outline';
 
 const form = useForm({
     name: '',
     company_name: '',
+    phone: '',
+    shipping_address: '',
     email: '',
     password: '',
     password_confirmation: '',
@@ -31,7 +33,7 @@ const submit = () => {
     const emailDomain = form.email.split('@')[1];
 
     if (emailDomain && freeEmailDomains.includes(emailDomain.toLowerCase())) {
-        emailError.value = 'Please use a valid corporate email address (e.g. purchasing@yourcompany.com). Free email providers are not allowed for B2B accounts.';
+        emailError.value = 'Please use a valid corporate email address (e.g. purchasing@yourcompany.com). Free email providers are not allowed for client accounts.';
         return; // Stop submission
     }
 
@@ -81,6 +83,30 @@ const submit = () => {
                                 </div>
                                 <p class="mt-1 text-xs text-gray-400">Required for B2B approval</p>
                                 <p v-if="form.errors.company_name" class="mt-2 text-sm text-jubis-red">{{ form.errors.company_name }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Contact & Shipping -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div>
+                                <label for="phone" class="block text-sm font-semibold text-gray-700">Contact Number</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <PhoneIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
+                                    </div>
+                                    <input id="phone" type="tel" v-model="form.phone" @input="form.phone = form.phone.replace(/[^0-9+\-\s()]/g, '')" required class="focus:ring-jubis-navy focus:border-jubis-navy block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" placeholder="0912 345 6789" />
+                                </div>
+                                <p v-if="form.errors.phone" class="mt-2 text-sm text-jubis-red">{{ form.errors.phone }}</p>
+                            </div>
+                            <div>
+                                <label for="shipping_address" class="block text-sm font-semibold text-gray-700">Primary Shipping Address</label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <MapPinIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
+                                    </div>
+                                    <input id="shipping_address" type="text" v-model="form.shipping_address" required class="focus:ring-jubis-navy focus:border-jubis-navy block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-3" placeholder="123 Warehouse St, Manila" />
+                                </div>
+                                <p v-if="form.errors.shipping_address" class="mt-2 text-sm text-jubis-red">{{ form.errors.shipping_address }}</p>
                             </div>
                         </div>
 

@@ -1,0 +1,1 @@
+<?php require __DIR__."/vendor/autoload.php"; $app = require_once __DIR__."/bootstrap/app.php"; $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class); $kernel->bootstrap(); $variant = \App\Models\Product::where("sku", "E27-688")->first(); if($variant) { $variant->stock_quantity = 10000; $variant->save(); echo "Variant updated!"; } else { echo "Variant not found"; }

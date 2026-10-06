@@ -19,7 +19,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 
 Route::get('/products', function (Request $request) {
-    $query = Product::with('category')->where('is_active', true)->whereNull('parent_id');
+    $query = Product::with(['category', 'variants'])->where('is_active', true)->whereNull('parent_id');
 
     if ($request->filled('search')) {
         $query->where(function($q) use ($request) {
@@ -78,7 +78,7 @@ Route::get('/dashboard', function () {
         return redirect()->route('admin.dashboard');
     }
     
-    $recentQuotes = \App\Models\Quote::with(['items.product', 'invoice'])
+    $recentQuotes = \App\Models\Quote::with(['items.product', 'invoice.shipments'])
         ->where('user_id', auth()->id())
         ->where('status', '!=', 'draft') // Exclude active cart
         ->orderBy('created_at', 'desc')
@@ -99,6 +99,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
 
     // INVENTORY & LOGISTICS (Warehouse, Purchasing, Super Admin)
     Route::middleware('role:super_admin,admin,warehouse,purchasing')->group(function() {
+        Route::get('inventory-export', [\App\Http\Controllers\Admin\ProductController::class, 'exportCsv'])->name('admin.products.export');
         Route::resource('inventory', \App\Http\Controllers\Admin\ProductController::class)
             ->parameters(['inventory' => 'product'])
             ->names('admin.products');
@@ -122,6 +123,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     // FINANCE & REPORTS (Finance, Super Admin)
     Route::middleware('role:super_admin,admin,finance')->group(function() {
         Route::resource('invoices', \App\Http\Controllers\Admin\InvoiceController::class)->names('admin.invoices')->only(['index', 'show']);
+        Route::resource('rmas', \App\Http\Controllers\Admin\RMAController::class)->names('admin.rmas')->only(['index']);
         Route::post('invoices/{invoice}/payment', [\App\Http\Controllers\Admin\InvoiceController::class, 'updatePayment'])->name('admin.invoices.payment');
         
         Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('admin.reports.index');
@@ -150,6 +152,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/cart/add', [\App\Http\Controllers\QuoteController::class, 'add'])->name('cart.add');
     Route::delete('/cart/{item}', [\App\Http\Controllers\QuoteController::class, 'remove'])->name('cart.remove');
     Route::post('/cart/submit', [\App\Http\Controllers\QuoteController::class, 'submit'])->name('cart.submit');
+    Route::post('/invoices/{id}/rma', [\App\Http\Controllers\QuoteController::class, 'requestRMA'])->name('cart.rma');
 
     Route::get('/invoices/{invoice}/pdf', function(\App\Models\Invoice $invoice) {
         if ($invoice->user_id !== auth()->id() && auth()->user()->role !== 'admin') {
@@ -169,7 +172,23 @@ require __DIR__.'/auth.php';
 
 // API Webhooks & Automations
 Route::post('/webhooks/paymongo', [\App\Http\Controllers\WebhookController::class, 'handlePayMongo']);
-Route::get('/api/mock/payment/{referenceId}', [\App\Http\Controllers\WebhookController::class, 'simulatePayment']);
+Route::get('/api/mock/payment/invoice/{id}', [\App\Http\Controllers\WebhookController::class, 'simulatePayment']);
+Route::post('/api/mock/payment/process/invoice/{id}', [\App\Http\Controllers\WebhookController::class, 'processPayment']);
+
+Route::post('/api/invoices/{id}/accept-terms', function ($id) {
+    $invoice = \App\Models\Invoice::with('quote.items')->findOrFail($id);
+    if ($invoice->user_id !== auth()->id()) abort(403);
+    
+    $totalQty = $invoice->quote->items->sum('quantity');
+    if ($totalQty < 1000) abort(400, 'Not eligible for credit terms.');
+    
+    $invoice->update(['status' => 'on_terms']);
+    
+    // Create a 30-day due date from today
+    $invoice->update(['due_date' => now()->addDays(30)]);
+    
+    return redirect()->back()->with('success', 'Credit Terms (Net-30) successfully activated. Your order is cleared for shipping!');
+})->middleware('auth');
 
 
 Route::get('/api/mock/tracking/{tracking}', function($tracking) { $shipment = \App\Models\Shipment::where('tracking_number', $tracking)->first(); return view('mock-tracking', ['tracking' => $tracking, 'shipments' => $shipment]); });

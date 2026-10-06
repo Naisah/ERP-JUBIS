@@ -9,9 +9,28 @@ use Inertia\Inertia;
 
 class ProductController extends Controller
 {
+    public function exportCsv()
+    {
+        $products = Product::with('category')->orderBy('sku')->get();
+        $csvData = "ID,SKU,Name,Brand,Category,Price,Stock Quantity,Product Type\n";
+        
+        foreach($products as $p) {
+            $type = $p->parent_id ? 'Variant' : 'Master Folder';
+            $category = $p->category ? str_replace('"', '""', $p->category->name) : '';
+            $name = str_replace('"', '""', $p->name);
+            $csvData .= "{$p->id},{$p->sku},\"{$name}\",{$p->brand},\"{$category}\",{$p->wholesale_price},{$p->stock_quantity},{$type}\n";
+        }
+        
+        return response($csvData)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="jubis_erp_inventory_' . date('Y-m-d') . '.csv"');
+    }
+
     public function index(Request $request)
     {
-        $query = Product::with('category')->orderBy('created_at', 'desc');
+        $query = Product::with('category')->withCount('variants')
+            ->orderBy('stock_quantity', 'asc')
+            ->orderBy('sku', 'asc');
 
         if ($request->filled('search')) {
             $searchTerm = $request->search;

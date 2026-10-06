@@ -145,6 +145,38 @@ class QuoteController extends Controller
             'total_amount' => $total
         ]);
     }
+
+    public function requestRMA(\Illuminate\Http\Request $request, $invoiceId)
+    {
+        $invoice = \App\Models\Invoice::with('quote.items')->where('id', $invoiceId)->where('user_id', auth()->id())->firstOrFail();
+        
+        if ($invoice->status !== 'paid' && $invoice->status !== 'on_terms') {
+            return redirect()->back()->with('error', 'Only paid or active credit invoices can be returned.');
+        }
+
+        $existing = \App\Models\RMA::where('invoice_id', $invoiceId)->first();
+        if ($existing) {
+            return redirect()->back()->with('error', 'An RMA request already exists for this order.');
+        }
+
+        $rma = \App\Models\RMA::create([
+            'user_id' => auth()->id(),
+            'invoice_id' => $invoice->id,
+            'status' => 'pending',
+            'reason' => 'Client requested return via dashboard',
+            'refund_amount' => 0
+        ]);
+
+        foreach ($invoice->quote->items as $item) {
+            \App\Models\RMAItem::create([
+                'rma_id' => $rma->id,
+                'product_id' => $item->product_id,
+                'quantity' => $item->quantity
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'RMA Request submitted successfully. Our team will review your return.');
+    }
 }
 
 

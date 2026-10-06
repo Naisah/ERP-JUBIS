@@ -75,14 +75,16 @@ const addToQuote = (productId, qty) => {
                                 <ShieldCheckIcon class="w-6 h-6 text-jubis-navy flex-shrink-0 mt-0.5" />
                                 <div>
                                     <h3 class="font-bold text-jubis-navy text-sm">Wholesale Pricing Available</h3>
-                                    <p class="text-sm text-gray-600 mt-1">Please <Link href="/login" class="text-jubis-red font-bold hover:underline">sign in to your B2B account</Link> to view exclusive corporate pricing and request a formal quotation.</p>
+                                    <p class="text-sm text-gray-600 mt-1">Please <Link href="/login" class="text-jubis-red font-bold hover:underline">sign in to your client account</Link> to view exclusive corporate pricing and request a formal quotation.</p>
                                 </div>
                             </div>
                             <div v-else class="mb-8">
                                 <p v-if="product.variants && product.variants.length > 0" class="text-gray-500 text-sm mb-1">See variant table below for pricing</p>
                                 <div v-else>
-                                    <p class="text-3xl font-extrabold text-gray-900">₱{{ Number(product.wholesale_price).toLocaleString('en-PH', {minimumFractionDigits: 2}) }} <span class="text-sm text-gray-500 font-normal">/ {{ product.unit_of_measure }}</span></p>
-                                    <p class="text-sm text-green-600 font-bold mt-1">Baseline Corporate Price</p>
+                                    <p v-if="Number(product.wholesale_price) > 0" class="text-3xl font-extrabold text-gray-900">₱{{ Number(product.wholesale_price).toLocaleString('en-PH', {minimumFractionDigits: 2}) }} <span class="text-sm text-gray-500 font-normal">/ {{ product.unit_of_measure }}</span></p>
+                                    <p v-else class="text-xl font-bold text-gray-500 italic">Volume Pricing</p>
+                                    <p v-if="Number(product.wholesale_price) > 0" class="text-sm text-green-600 font-bold mt-1">Baseline Corporate Price</p>
+                                    <p v-else class="text-sm text-gray-400 font-bold mt-1">Price available upon quote request</p>
                                 </div>
                             </div>
 
@@ -96,7 +98,7 @@ const addToQuote = (productId, qty) => {
                                     <div class="flex items-center border border-gray-300 rounded-md bg-white">
                                         <button @click="quantity > 1 ? quantity-- : null" class="px-4 py-3 text-gray-500 hover:text-jubis-navy hover:bg-gray-50 transition">-</button>
                                         <input type="number" v-model="quantity" min="1" :max="product.stock_quantity" @keypress="(e) => e.key === '-' || e.key === 'e' || e.key === '.' ? e.preventDefault() : null" class="w-16 text-center border-0 focus:ring-0 text-sm font-bold p-0" />
-                                        <button @click="quantity++" class="px-4 py-3 text-gray-500 hover:text-jubis-navy hover:bg-gray-50 transition">+</button>
+                                        <button @click="quantity < product.stock_quantity ? quantity++ : null" class="px-4 py-3 text-gray-500 hover:text-jubis-navy hover:bg-gray-50 transition">+</button>
                                     </div>
                                     
                                     <!-- Add to Quote Button -->
@@ -156,7 +158,7 @@ const addToQuote = (productId, qty) => {
                                             <div class="flex items-center justify-center border border-gray-300 rounded bg-white w-28 mx-auto" :class="{'opacity-50 cursor-not-allowed': !variant.stock_quantity > 0}">
                                                 <button :disabled="!variant.stock_quantity > 0" @click="variantQuantities[variant.id] > 1 ? variantQuantities[variant.id]-- : null" class="px-2 py-1 text-gray-500 hover:text-jubis-navy hover:bg-gray-50">-</button>
                                                 <input :disabled="!variant.stock_quantity > 0" type="number" v-model="variantQuantities[variant.id]" min="1" :max="variant.stock_quantity" class="w-12 text-center border-0 focus:ring-0 text-xs font-bold p-0" />
-                                                <button :disabled="!variant.stock_quantity > 0" @click="variantQuantities[variant.id]++" class="px-2 py-1 text-gray-500 hover:text-jubis-navy hover:bg-gray-50">+</button>
+                                                <button :disabled="!variant.stock_quantity > 0" @click="variantQuantities[variant.id] < variant.stock_quantity ? variantQuantities[variant.id]++ : null" class="px-2 py-1 text-gray-500 hover:text-jubis-navy hover:bg-gray-50">+</button>
                                             </div>
                                         </td>
                                         <td class="px-4 py-4 text-right">

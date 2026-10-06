@@ -41,8 +41,9 @@ class PayMongoService
                     'data' => [
                         'attributes' => [
                             'amount' => $amountInCents,
-                            'description' => 'Payment for Invoice #' . str_pad($invoice->id, 5, '0', STR_PAD_LEFT),
-                            'remarks' => 'Jubis Marketing ERP Automation'
+                            'description' => 'Payment for Invoice #INV-' . str_pad($invoice->quote_id, 5, '0', STR_PAD_LEFT),
+                            'remarks' => 'Jubis Marketing ERP Automation',
+                            'payment_method_allowed' => ['card', 'paymaya', 'gcash', 'qrph']
                         ]
                     ]
                 ]);

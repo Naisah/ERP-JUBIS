@@ -13,31 +13,31 @@ User::where('email', 'admin@jubismarketing.com')->update(['role' => 'super_admin
 $employees = [
     [
         'name' => 'Jubis CEO',
-        'email' => 'ceo@jubismarketing.com',
+        'email' => 'andreapanganiban05@gmail.com',
         'role' => 'super_admin',
         'password' => 'password123',
     ],
     [
         'name' => 'Sales Department',
-        'email' => 'sales@jubismarketing.com',
+        'email' => 'georgeilagan62@gmail.com',
         'role' => 'sales',
         'password' => 'password123',
     ],
     [
         'name' => 'Finance Department',
-        'email' => 'finance@jubismarketing.com',
+        'email' => 'andreabermudez0511@gmail.com',
         'role' => 'finance',
         'password' => 'password123',
     ],
     [
         'name' => 'Purchasing Department',
-        'email' => 'purchasing@jubismarketing.com',
+        'email' => 'karlammagalong6@gmail.com',
         'role' => 'purchasing',
         'password' => 'password123',
     ],
     [
         'name' => 'Warehouse & Logistics',
-        'email' => 'warehouse@jubismarketing.com',
+        'email' => 'dwyanetjhung@gmail.com',
         'role' => 'warehouse',
         'password' => 'password123',
     ]

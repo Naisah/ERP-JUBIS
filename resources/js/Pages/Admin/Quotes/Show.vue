@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { ArrowLeftIcon, CheckCircleIcon, XCircleIcon, ClockIcon } from '@heroicons/vue/24/outline';
+import { ArrowLeftIcon, CheckCircleIcon, XCircleIcon, ClockIcon, DocumentTextIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
     quote: Object
@@ -101,6 +101,25 @@ const getStatusColor = (status) => {
                             </tr>
                         </tfoot>
                     </table>
+                </div>
+                
+                <!-- Notes & Remarks -->
+                <div v-if="quote.client_notes || quote.admin_notes" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+                    <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                        <DocumentTextIcon class="w-5 h-5 mr-2" /> Notes & Remarks
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div v-if="quote.client_notes" class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                            <h3 class="text-sm font-bold text-blue-800 uppercase tracking-wider mb-2">Client Request / Remarks</h3>
+                            <p class="text-gray-700 whitespace-pre-line text-sm">{{ quote.client_notes }}</p>
+                        </div>
+                        
+                        <div v-if="quote.admin_notes" class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                            <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">Internal Admin Notes</h3>
+                            <p class="text-gray-700 whitespace-pre-line text-sm">{{ quote.admin_notes }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 

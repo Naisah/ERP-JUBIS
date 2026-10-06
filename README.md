@@ -1,59 +1,37 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Jubis ERP - B2B Electrical Distributor System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Jubis ERP is a robust, custom-built enterprise resource planning platform designed for B2B electrical distributors. Built on **Laravel 11**, **Vue 3**, **Inertia.js**, and **TailwindCSS**, it seamlessly integrates warehouse inventory management, dynamic sales pipelines, and B2B financial workflows.
 
-## About Laravel
+## ?? Key Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### ?? Advanced Inventory Management
+* **Master/Variant Hierarchy:** Intelligently tracks parent containers (Master Folders) and individual SKU variants.
+* **Low Stock Automation:** Automatically generates Draft Purchase Orders when variant stock dips below the reorder threshold.
+* **Instant Export:** 1-click CSV export of the entire catalog for warehouse staff.
+* **Transaction Safety:** Utilizes SQL row-level locking (lockForUpdate) to prevent race conditions during high-volume B2B checkouts.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### ?? B2B Financials & Checkout
+* **Dynamic Gateway Routing:** Carts under 1,000 items route to the **PayMongo** API for instant payment (GCash/Card).
+* **Net-30 Credit Terms:** Orders exceeding 1,000 items automatically bypass the payment gateway, offering legally binding Corporate Net-30 credit terms.
+* **Webhook Security:** Cryptographically verified HMAC-SHA256 webhooks guarantee that automated 'Invoice Paid' triggers cannot be spoofed.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### ?? RMA (Return Merchandise Authorization)
+* **Client Portal:** Clients can easily request returns for defective or excess stock directly from their paid dashboard.
+* **Admin Processing:** Dedicated dashboard for the warehouse to review, approve, and mathematically restock items back into the live inventory.
 
-## Learning Laravel
+### ?? Role-Based Access Control
+* **Secure Middleware:** Strict partitioning between Super Admins, Sales, Purchasing, Finance, and Client accounts.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## ?? Tech Stack
+* **Backend:** PHP 8, Laravel 11, MySQL
+* **Frontend:** Vue.js 3, Inertia.js, Tailwind CSS
+* **Integrations:** PayMongo (Payments)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## ?? Local Setup
+1. Clone the repository.
+2. Run \composer install\ and \
+pm install\.
+3. Copy \.env.example\ to \.env\ and configure your database and \PAYMONGO_SECRET_KEY\.
+4. Run \php artisan migrate --seed\.
+5. Run \php artisan serve\ and \
+pm run dev\.

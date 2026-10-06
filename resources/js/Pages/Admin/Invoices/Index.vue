@@ -12,6 +12,7 @@ const getStatusColor = (status) => {
         case 'unpaid': return 'bg-gray-100 text-gray-800';
         case 'partially_paid': return 'bg-yellow-100 text-yellow-800';
         case 'paid': return 'bg-green-100 text-green-800';
+        case 'on_terms': return 'bg-purple-100 text-purple-800';
         case 'overdue': return 'bg-red-100 text-red-800';
         default: return 'bg-gray-100 text-gray-800';
     }
@@ -42,7 +43,7 @@ const getStatusColor = (status) => {
                 <tbody class="divide-y divide-gray-200 bg-white">
                     <tr v-for="invoice in invoices.data" :key="invoice.id" class="hover:bg-gray-50">
                         <td class="whitespace-nowrap py-4 pl-4 pr-3 font-bold text-gray-900">
-                            INV-{{ String(invoice.id).padStart(5, '0') }}
+                            INV-{{ String(invoice.quote_id).padStart(5, '0') }}
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-gray-900">
                             <div class="font-medium">{{ invoice.user?.company_name || invoice.user?.name }}</div>
