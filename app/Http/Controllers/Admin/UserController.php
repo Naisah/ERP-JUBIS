@@ -75,6 +75,7 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'role' => ['required', Rule::in(['super_admin', 'admin', 'sales', 'finance', 'purchasing', 'warehouse', 'client'])],
             'company_name' => 'nullable|string|max:255',
+            'credit_status' => 'nullable|string|in:pending,approved,suspended',
         ]);
 
         if ($request->filled('password')) {

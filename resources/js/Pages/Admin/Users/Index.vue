@@ -52,6 +52,7 @@ const editForm = useForm({
     password: '',
     role: '',
     company_name: '',
+    credit_status: '',
 });
 
 const openCreateModal = () => {
@@ -68,6 +69,7 @@ const openEditModal = (user) => {
     editForm.email = user.email;
     editForm.role = user.role;
     editForm.company_name = user.company_name || '';
+    editForm.credit_status = user.credit_status || 'pending';
     showEditModal.value = true;
 };
 
@@ -156,7 +158,7 @@ const getRoleLabel = (role) => {
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Name / Company</th>
                             <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">System Role</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">System Role</th>`n<th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Account Status</th>
                             <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Joined</th>
                             <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -168,11 +170,18 @@ const getRoleLabel = (role) => {
                                 <div class="text-sm text-gray-500">{{ user.company_name || 'â€”' }}</div>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-600">{{ user.email }}</td>
-                            <td class="px-6 py-4">
-                                <span :class="[getRoleBadge(user.role), 'px-2.5 py-0.5 rounded-full text-xs font-medium uppercase']">
-                                    {{ getRoleLabel(user.role) }}
-                                </span>
-                            </td>
+                            
+<td class="px-6 py-4">
+    <span :class="[getRoleBadge(user.role), 'px-2.5 py-0.5 rounded-full text-xs font-medium uppercase']">
+        {{ getRoleLabel(user.role) }}
+    </span>
+</td>
+<td class="px-6 py-4">
+    <span v-if="user.role === 'client'" :class="[user.credit_status === 'approved' ? 'bg-green-100 text-green-800' : (user.credit_status === 'suspended' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'), 'px-2.5 py-0.5 rounded-full text-xs font-medium uppercase']">
+        {{ user.credit_status }}
+    </span>
+    <span v-else class="text-gray-400 text-xs">—</span>
+</td>
                             <td class="px-6 py-4 text-sm text-gray-500">{{ new Date(user.created_at).toLocaleDateString() }}</td>
                             <td class="px-6 py-4 text-right text-sm font-medium">
                                 <button @click="openEditModal(user)" class="text-blue-600 hover:text-blue-900 mr-4" title="Edit User">
@@ -292,6 +301,16 @@ const getRoleLabel = (role) => {
                             </select>
                             <InputError :message="editForm.errors.role" class="mt-2" />
                         </div>
+
+                        <div v-if="editForm.role === 'client'">
+                            <InputLabel for="edit_credit_status" value="Account Status (B2B Approval)" />
+                            <select id="edit_credit_status" v-model="editForm.credit_status" class="mt-1 block w-full border-gray-300 focus:border-jubis-navy focus:ring-jubis-navy rounded-md shadow-sm">
+                                <option value="pending">Pending Approval</option>
+                                <option value="approved">Approved</option>
+                                <option value="suspended">Suspended</option>
+                            </select>
+                            <InputError :message="editForm.errors.credit_status" class="mt-2" />
+                        </div>
                         
                         <hr class="my-4" />
                         
@@ -311,3 +330,5 @@ const getRoleLabel = (role) => {
         </Modal>
     </AdminLayout>
 </template>
+
+
