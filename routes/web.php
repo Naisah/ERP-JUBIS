@@ -206,7 +206,7 @@ Route::get('/api/mock/tracking/{tracking}', function($tracking) { $shipment = \A
 
 Route::get('/setup-database', function () {
     try {
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--force' => true]);
         \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
         return 'Database successfully migrated and seeded! You can now use the app.';
     } catch (\Exception $e) {
