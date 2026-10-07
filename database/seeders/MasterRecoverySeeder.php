@@ -6,6 +6,8 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use App\Models\Category;
+use App\Models\Product;
 
 class MasterRecoverySeeder extends Seeder
 {
@@ -29,7 +31,7 @@ class MasterRecoverySeeder extends Seeder
         $categories = json_decode($catJson, true);
         if ($categories) {
             foreach (array_chunk($fixDates($categories), 50) as $chunk) {
-                DB::table('categories')->insert($chunk);
+                Category::upsert($chunk, ['id'], ['name', 'slug', 'parent_id', 'description']);
             }
         }
 
@@ -37,7 +39,11 @@ class MasterRecoverySeeder extends Seeder
         $products = json_decode($prodJson, true);
         if ($products) {
             foreach (array_chunk($fixDates($products), 50) as $chunk) {
-                DB::table('products')->insert($chunk);
+                Product::upsert($chunk, ['id'], [
+                    'category_id', 'name', 'sku', 'brand', 'description', 
+                    'image_path', 'stock_quantity', 'reorder_level', 
+                    'unit_of_measure', 'wholesale_price', 'average_cost', 'is_active', 'parent_id'
+                ]);
             }
         }
 
