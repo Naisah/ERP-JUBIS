@@ -44,13 +44,6 @@ class RegisteredUserController extends Controller
                 'max:255',
                 'unique:'.User::class,
                 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
-                function ($attribute, $value, $fail) {
-                    $freeDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com', 'icloud.com'];
-                    $domain = substr(strrchr($value, "@"), 1);
-                    if (in_array(strtolower($domain), $freeDomains)) {
-                        $fail('Please use a valid corporate email address. Free email providers are not allowed for B2B accounts.');
-                    }
-                },
             ],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
@@ -75,3 +68,4 @@ class RegisteredUserController extends Controller
         return redirect(route('dashboard', absolute: false));
     }
 }
+

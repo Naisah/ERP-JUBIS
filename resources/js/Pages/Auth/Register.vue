@@ -32,11 +32,6 @@ const submit = () => {
     const freeEmailDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com', 'icloud.com'];
     const emailDomain = form.email.split('@')[1];
 
-    if (emailDomain && freeEmailDomains.includes(emailDomain.toLowerCase())) {
-        emailError.value = 'Please use a valid corporate email address (e.g. purchasing@yourcompany.com). Free email providers are not allowed for client accounts.';
-        return; // Stop submission
-    }
-
     form.post(route('register'), {
         onFinish: () => form.reset('password', 'password_confirmation'),
     });
