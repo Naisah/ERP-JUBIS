@@ -28,6 +28,6 @@
                          "vue-chartjs":  "^5.3.4"
                      },
     "engines":  {
-                    "node":  "20"
+                    "node":  "22"
                 }
 }
