@@ -213,3 +213,20 @@ Route::get('/setup-database', function () {
         return 'Error: ' . $e->getMessage();
     }
 });
+Route::get('/setup-database', function () {
+    try {
+        // Brute force drop all known tables to bypass any foreign key or timeout issues
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+        \ = ['r_m_a_items', 'r_m_a_s', 'stock_movements', 'quote_items', 'quotes', 'invoices', 'shipments', 'purchase_order_items', 'purchase_orders', 'products', 'categories', 'suppliers', 'sessions', 'cache', 'cache_locks', 'jobs', 'job_batches', 'failed_jobs', 'password_reset_tokens', 'users', 'migrations'];
+        foreach (\ as \) {
+            \Illuminate\Support\Facades\Schema::dropIfExists(\);
+        }
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        return 'Database successfully migrated and seeded! You can now use the app.';
+    } catch (\Exception \) {
+        return 'Error: ' . \->getMessage();
+    }
+});
