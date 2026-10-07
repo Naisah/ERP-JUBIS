@@ -192,41 +192,22 @@ Route::post('/api/invoices/{id}/accept-terms', function ($id) {
 
 
 Route::get('/api/mock/tracking/{tracking}', function($tracking) { $shipment = \App\Models\Shipment::where('tracking_number', $tracking)->first(); return view('mock-tracking', ['tracking' => $tracking, 'shipments' => $shipment]); });
-
-
-
-
-
-
-
-
-
-
-
-
 Route::get('/setup-database', function () {
     try {
-        \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--force' => true]);
-        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
-        return 'Database successfully migrated and seeded! You can now use the app.';
-    } catch (\Exception $e) {
-        return 'Error: ' . $e->getMessage();
-    }
-});
-Route::get('/setup-database', function () {
-    try {
-        // Brute force drop all known tables to bypass any foreign key or timeout issues
         \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
-        \ = ['r_m_a_items', 'r_m_a_s', 'stock_movements', 'quote_items', 'quotes', 'invoices', 'shipments', 'purchase_order_items', 'purchase_orders', 'products', 'categories', 'suppliers', 'sessions', 'cache', 'cache_locks', 'jobs', 'job_batches', 'failed_jobs', 'password_reset_tokens', 'users', 'migrations'];
-        foreach (\ as \) {
-            \Illuminate\Support\Facades\Schema::dropIfExists(\);
+        $tables = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
+        $dbName = 'Tables_in_defaultdb';
+        foreach ($tables as $table) {
+            $tableName = (array)$table;
+            $tableName = array_values($tableName)[0];
+            \Illuminate\Support\Facades\DB::statement('DROP TABLE IF EXISTS ' . $tableName . '');
         }
         \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
 
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
         \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
         return 'Database successfully migrated and seeded! You can now use the app.';
-    } catch (\Exception \) {
-        return 'Error: ' . \->getMessage();
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
     }
 });
