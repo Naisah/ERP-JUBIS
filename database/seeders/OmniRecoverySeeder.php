@@ -13,6 +13,12 @@ class OmniRecoverySeeder extends Seeder
         $json = File::get(database_path('seeders/omni_products.json'));
         $products = json_decode($json, true);
         
+        foreach ($products as &$product) {
+            unset($product['specifications']);
+            unset($product['parent']);
+            unset($product['image_path']); // Just in case of duplicates or mismatch, but wait, image_path is valid.
+        }
+        
         foreach (array_chunk($products, 50) as $chunk) {
             Product::insert($chunk);
         }
