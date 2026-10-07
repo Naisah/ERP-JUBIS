@@ -50,9 +50,12 @@ class ProductController extends Controller
             }
         }
 
+        $totalInventoryValue = (clone $query)->sum(\Illuminate\Support\Facades\DB::raw('stock_quantity * wholesale_price'));
+
         return Inertia::render('Admin/Products/Index', [
             'products' => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only(['search', 'stock'])
+            'filters' => $request->only(['search', 'stock']),
+            'totalInventoryValue' => $totalInventoryValue
         ]);
     }
 

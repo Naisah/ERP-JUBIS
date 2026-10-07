@@ -16,6 +16,7 @@ import {
 const props = defineProps({
     products: Object,
     filters: Object,
+    totalInventoryValue: Number,
 });
 
 const search = ref(props.filters.search || '');
@@ -52,10 +53,7 @@ const getStockBadge = (product) => {
     return { label: 'In Stock', classes: 'bg-green-100 text-green-800 border-green-200' };
 };
 
-const totalValue = computed(() => {
-    if (!props.products?.data) return 0;
-    return props.products.data.reduce((sum, p) => sum + (p.stock_quantity * p.wholesale_price), 0);
-});
+
 </script>
 
 <template>
@@ -82,8 +80,8 @@ const totalValue = computed(() => {
                 <p class="text-2xl font-extrabold text-red-600 mt-1">{{ products.data?.filter(p => !p.variants_count && p.stock_quantity <= 0).length || 0 }}</p>
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Page Inventory Value</p>
-                <p class="text-2xl font-extrabold text-green-700 mt-1">₱{{ totalValue.toLocaleString('en-PH', {minimumFractionDigits: 2}) }}</p>
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Inventory Value</p>
+                <p class="text-2xl font-extrabold text-green-700 mt-1">₱{{ Number(totalInventoryValue || 0).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}</p>
             </div>
         </div>
 
@@ -202,3 +200,4 @@ const totalValue = computed(() => {
         </div>
     </AdminLayout>
 </template>
+
