@@ -1,4 +1,5 @@
 <script setup>
+import Pagination from '@/Components/Pagination.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { PlusIcon } from '@heroicons/vue/24/outline';
@@ -34,7 +35,7 @@ const getStatusColor = (status) => {
             </Link>
         </div>
 
-        <div class="bg-white shadow-sm ring-1 ring-gray-300 rounded-lg overflow-hidden">
+        <div class="bg-white shadow-sm ring-1 ring-gray-300 rounded-lg overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-300 text-sm">
                 <thead class="bg-gray-50">
                     <tr>
@@ -69,5 +70,6 @@ const getStatusColor = (status) => {
                 </tbody>
             </table>
         </div>
+    <Pagination :links="purchaseOrders.links" />
     </AdminLayout>
 </template>

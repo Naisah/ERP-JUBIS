@@ -1,4 +1,5 @@
 <script setup>
+import Pagination from '@/Components/Pagination.vue';
 import { Head, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 
@@ -32,7 +33,7 @@ const updateStatus = (id, newStatus) => {
             <p class="text-sm text-gray-500 mt-1">Manage outbound shipments and update delivery statuses.</p>
         </div>
 
-        <div class="bg-white shadow-sm ring-1 ring-gray-300 rounded-lg overflow-hidden">
+        <div class="bg-white shadow-sm ring-1 ring-gray-300 rounded-lg overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-300 text-sm">
                 <thead class="bg-gray-50">
                     <tr>
@@ -82,5 +83,6 @@ const updateStatus = (id, newStatus) => {
                 </tbody>
             </table>
         </div>
+    <Pagination :links="shipments.links" />
     </AdminLayout>
 </template>

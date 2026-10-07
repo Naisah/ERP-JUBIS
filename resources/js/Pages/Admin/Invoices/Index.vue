@@ -1,4 +1,5 @@
 <script setup>
+import Pagination from '@/Components/Pagination.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 
@@ -28,7 +29,7 @@ const getStatusColor = (status) => {
             <p class="text-sm text-gray-500 mt-1">Manage client billing, payments, and account receivables.</p>
         </div>
 
-        <div class="bg-white shadow-sm ring-1 ring-gray-300 rounded-lg overflow-hidden">
+        <div class="bg-white shadow-sm ring-1 ring-gray-300 rounded-lg overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-300 text-sm">
                 <thead class="bg-gray-50">
                     <tr>
@@ -66,5 +67,6 @@ const getStatusColor = (status) => {
                 </tbody>
             </table>
         </div>
+    <Pagination :links="invoices.links" />
     </AdminLayout>
 </template>

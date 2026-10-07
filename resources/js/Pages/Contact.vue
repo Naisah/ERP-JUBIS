@@ -45,32 +45,32 @@ import { MapPinIcon, PhoneIcon, EnvelopeIcon, ClockIcon } from '@heroicons/vue/2
                         <form class="space-y-6" @submit.prevent="submit">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700">First Name</label>
-                                    <input v-model="form.first_name" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
+                                    <label for="contact-first_name" class="block text-sm font-semibold text-gray-700">First Name</label>
+                                    <input id="contact-first_name" v-model="form.first_name" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700">Last Name</label>
-                                    <input v-model="form.first_name" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
+                                    <label for="contact-last_name" class="block text-sm font-semibold text-gray-700">Last Name</label>
+                                    <input id="contact-last_name" v-model="form.last_name" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
                                 </div>
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700">Company Name</label>
-                                <input v-model="form.first_name" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
+                                <label for="contact-company" class="block text-sm font-semibold text-gray-700">Company Name</label>
+                                <input id="contact-company" v-model="form.company" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700">Email Address</label>
-                                <input type="email" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
+                                <label for="contact-email" class="block text-sm font-semibold text-gray-700">Email Address</label>
+                                <input id="contact-email" v-model="form.email" required type="email" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700">Message / Inquiry</label>
-                                <textarea rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy"></textarea>
+                                <label for="contact-message" class="block text-sm font-semibold text-gray-700">Message / Inquiry</label>
+                                <textarea id="contact-message" v-model="form.message" required rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy"></textarea>
                             </div>
 
-                            <button type="button" class="w-full bg-jubis-red text-white font-bold py-3 px-4 rounded-md shadow hover:bg-red-700 transition">
-                                Send Message
+                            <button type="submit" :disabled="form.processing" class="w-full bg-jubis-red text-white font-bold py-3 px-4 rounded-md shadow hover:bg-red-700 transition">
+                                {{ form.processing ? 'Sending...' : 'Send Message' }}
                             </button>
                         </form>
                     </div>

@@ -100,11 +100,11 @@ const getStatusColor = (status) => {
             </div>
 
             <!-- Pagination -->
-            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center justify-between" v-if="quotes.data.length > 0">
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-wrap gap-3 items-center justify-between" v-if="quotes.data.length > 0">
                 <div class="text-sm text-gray-500">
                     Showing <span class="font-medium text-gray-900">{{ quotes.from }}</span> to <span class="font-medium text-gray-900">{{ quotes.to }}</span> of <span class="font-medium text-gray-900">{{ quotes.total }}</span> results
                 </div>
-                <div class="flex space-x-1" v-if="quotes.links && quotes.links.length > 3">
+                <div class="flex flex-wrap gap-1" v-if="quotes.links && quotes.links.length > 3">
                     <template v-for="(link, index) in quotes.links" :key="index">
                         <Link v-if="link.url" :href="link.url" class="px-3 py-1 border rounded text-sm font-medium transition-colors" :class="link.active ? 'bg-jubis-navy text-white border-jubis-navy' : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'" v-html="link.label" />
                         <span v-else class="px-3 py-1 border rounded text-sm font-medium bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed" v-html="link.label"></span>

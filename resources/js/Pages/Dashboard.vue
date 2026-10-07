@@ -7,6 +7,11 @@ const props = defineProps({
     recentQuotes: Array
 });
 
+// Keep legacy demo links working while honoring real checkout links.
+const paymentHref = (invoice) => invoice.payment_url?.includes('/api/mock/payment/')
+    ? `/api/mock/payment/invoice/${invoice.id}`
+    : invoice.payment_url;
+
 const getStatusColor = (status) => {
     switch (status) {
         case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
@@ -108,7 +113,7 @@ const getStatusColor = (status) => {
                                                 class="mt-2 text-xs font-bold bg-jubis-navy hover:bg-[#071126] text-white px-4 py-1.5 rounded-full transition shadow-sm w-full text-center">
                                                 Accept Credit Terms
                                             </Link>
-                                            <a v-else-if="quote.invoice.payment_url" :href="'/api/mock/payment/invoice/' + quote.invoice.id" class="mt-2 text-xs font-bold bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-full transition shadow-sm w-full text-center inline-block">
+                                            <a v-else-if="quote.invoice.payment_url" :href="paymentHref(quote.invoice)" class="mt-2 text-xs font-bold bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-full transition shadow-sm w-full text-center inline-block">
                                                 Pay via GCash/Card
                                             </a>
                                         </template>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onBeforeUnmount } from 'vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { ArrowLeftIcon, PhotoIcon } from '@heroicons/vue/24/outline';
@@ -25,10 +25,13 @@ const imagePreview = ref(null);
 const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+        if (imagePreview.value) URL.revokeObjectURL(imagePreview.value);
         form.image = file;
-        imagePreview.ref = URL.createObjectURL(file);
+        imagePreview.value = URL.createObjectURL(file);
     }
 };
+
+onBeforeUnmount(() => { if (imagePreview.value) URL.revokeObjectURL(imagePreview.value); });
 
 const submit = () => {
     form.post(route('admin.products.store'));
@@ -131,7 +134,7 @@ const submit = () => {
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <h2 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4">Product Image</h2>
                     
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative" @click="$refs.fileInput.click()">
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer relative" role="button" tabindex="0" aria-label="Choose product image" @keydown.enter.prevent="$refs.fileInput.click()" @keydown.space.prevent="$refs.fileInput.click()" @click="$refs.fileInput.click()">
                         <div class="space-y-1 text-center" v-if="!form.image">
                             <PhotoIcon class="mx-auto h-12 w-12 text-gray-400" />
                             <div class="flex text-sm text-gray-600 justify-center">
@@ -142,10 +145,11 @@ const submit = () => {
                             <p class="text-xs text-gray-500">PNG, JPG up to 2MB</p>
                         </div>
                         <div v-else class="text-center">
+                            <img v-if="imagePreview" :src="imagePreview" alt="Selected product image" class="h-32 mx-auto mb-3 object-contain" />
                             <span class="text-sm text-green-600 font-bold mb-2 block">Image Selected!</span>
                             <span class="text-xs text-gray-500">{{ form.image.name }}</span>
                         </div>
-                        <input type="file" ref="fileInput" @change="handleImageUpload" class="sr-only" accept="image/*" />
+                        <input type="file" ref="fileInput" @click.stop @change="handleImageUpload" class="sr-only" accept="image/*" />
                     </div>
                     <div v-if="form.errors.image" class="text-sm text-red-600 mt-2">{{ form.errors.image }}</div>
                 </div>

@@ -1,6 +1,7 @@
 <script setup>
-import { ref } from 'vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
+import Pagination from '@/Components/Pagination.vue';
+import { ref, onBeforeUnmount } from 'vue';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import Modal from '@/Components/Modal.vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -33,6 +34,7 @@ const setType = (type) => {
     roleFilter.value = 'all'; // reset role filter when switching tabs
     updateSearch();
 };
+onBeforeUnmount(() => updateSearch.cancel());
 
 const showCreateModal = ref(false);
 const showEditModal = ref(false);
@@ -200,21 +202,7 @@ const getRoleLabel = (role) => {
                 </table>
             </div>
             
-            <!-- Pagination -->
-            <div v-if="users.links.length > 3" class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                <div class="flex-1 flex justify-center">
-                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                        <Link v-for="(link, k) in users.links" :key="k"
-                            :href="link.url || '#'"
-                            :class="[
-                                link.active ? 'z-10 bg-blue-50 border-jubis-navy text-jubis-navy' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
-                                !link.url ? 'opacity-50 cursor-not-allowed' : '',
-                                'relative inline-flex items-center px-4 py-2 border text-sm font-medium'
-                            ]"
-                            v-html="link.label" />
-                    </nav>
-                </div>
-            </div>
+            <Pagination :links="users.links" />
         </div>
 
         <!-- Create User Modal -->
@@ -331,5 +319,4 @@ const getRoleLabel = (role) => {
         </Modal>
     </AdminLayout>
 </template>
-
 

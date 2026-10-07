@@ -1,5 +1,6 @@
 <script setup>
-import { ref, watch, computed } from 'vue';
+import ProductImage from '@/Components/ProductImage.vue';
+import { ref, watch, onBeforeUnmount } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import debounce from 'lodash/debounce';
@@ -22,14 +23,17 @@ const props = defineProps({
 const search = ref(props.filters.search || '');
 const stockFilter = ref(props.filters.stock || 'all');
 
-watch(search, debounce((value) => {
+const updateSearch = debounce((value) => {
     router.get(route('admin.products.index'), { search: value, stock: stockFilter.value }, {
         preserveState: true,
         replace: true,
     });
-}, 300));
+}, 300);
+watch(search, updateSearch);
+onBeforeUnmount(() => updateSearch.cancel());
 
 const applyStockFilter = (filter) => {
+    updateSearch.cancel();
     stockFilter.value = filter;
     router.get(route('admin.products.index'), { search: search.value, stock: filter }, {
         preserveState: true,
@@ -130,7 +134,7 @@ const getStockBadge = (product) => {
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="h-10 w-10 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center p-1 border border-gray-200">
-                                        <img :src="product.image_path || 'https://placehold.co/100x100/eeeeee/999999?text=No+Img'" alt="" class="h-full w-full object-contain rounded-md" />
+                                        <ProductImage :src="product.image_path" alt="" class="h-full w-full object-contain rounded-md" />
                                     </div>
                                     <div class="ml-4 max-w-[250px]">
                                         <div class="text-sm font-bold text-jubis-navy truncate">{{ product.name }}</div>
@@ -186,11 +190,11 @@ const getStockBadge = (product) => {
             </div>
 
             <!-- Pagination -->
-            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-wrap gap-3 items-center justify-between">
                 <div class="text-sm text-gray-500">
                     Showing <span class="font-medium text-gray-900">{{ products.from || 0 }}</span> to <span class="font-medium text-gray-900">{{ products.to || 0 }}</span> of <span class="font-medium text-gray-900">{{ products.total }}</span> results
                 </div>
-                <div class="flex space-x-1" v-if="products.links && products.links.length > 3">
+                <div class="flex flex-wrap gap-1" v-if="products.links && products.links.length > 3">
                     <template v-for="(link, index) in products.links" :key="index">
                         <Link v-if="link.url" :href="link.url" class="px-3 py-1 border rounded text-sm font-medium transition-colors" :class="link.active ? 'bg-jubis-navy text-white border-jubis-navy' : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300'" v-html="link.label" />
                         <span v-else class="px-3 py-1 border rounded text-sm font-medium bg-gray-50 text-gray-400 border-gray-200 cursor-not-allowed" v-html="link.label"></span>
@@ -200,4 +204,3 @@ const getStockBadge = (product) => {
         </div>
     </AdminLayout>
 </template>
-

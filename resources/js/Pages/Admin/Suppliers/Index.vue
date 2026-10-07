@@ -1,4 +1,5 @@
 <script setup>
+import Pagination from '@/Components/Pagination.vue';
 import { ref } from 'vue';
 import { Head, useForm, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
@@ -25,10 +26,12 @@ const form = useForm({
 const openCreate = () => {
     editingId.value = null;
     form.reset();
+    form.clearErrors();
     showModal.value = true;
 };
 
 const openEdit = (supplier) => {
+    form.clearErrors();
     editingId.value = supplier.id;
     form.name = supplier.name;
     form.brands_carried = supplier.brands_carried;
@@ -80,7 +83,7 @@ const destroy = (id) => {
             </button>
         </div>
 
-        <div class="bg-white shadow-sm ring-1 ring-gray-300 rounded-lg overflow-hidden">
+        <div class="bg-white shadow-sm ring-1 ring-gray-300 rounded-lg overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-300 text-sm">
                 <thead class="bg-gray-50">
                     <tr>
@@ -119,12 +122,13 @@ const destroy = (id) => {
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showModal = false"></div>
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+                <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-x-auto shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
                     <div>
                         <h3 class="text-lg leading-6 font-bold text-gray-900 mb-4" id="modal-title">
                             {{ editingId ? 'Edit Supplier' : 'Add New Supplier' }}
                         </h3>
                         <form @submit.prevent="submit" class="space-y-4">
+                            <ul v-if="Object.keys(form.errors).length" role="alert" class="text-sm text-red-700 list-disc pl-5"><li v-for="(error, field) in form.errors" :key="field">{{ error }}</li></ul>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Company Name</label>
                                 <input type="text" v-model="form.name" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy sm:text-sm" />
@@ -168,5 +172,6 @@ const destroy = (id) => {
                 </div>
             </div>
         </div>
+    <Pagination :links="suppliers.links" />
     </AdminLayout>
 </template>

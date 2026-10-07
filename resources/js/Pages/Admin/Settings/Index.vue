@@ -15,7 +15,7 @@ const form = useForm({
     company_address: props.settings?.company_address || '123 Business Road, Metro Manila, Philippines',
     contact_email: props.settings?.contact_email || 'contact@jubismarketing.com',
     contact_phone: props.settings?.contact_phone || '+63 912 345 6789',
-    vat_rate: props.settings?.vat_rate || 12,
+    vat_rate: props.settings?.vat_rate ?? 12,
     about_us_tagline: props.settings?.about_us_tagline || 'Your premier distributor of high-quality electrical supplies and industrial equipment in the Philippines.',
     about_us_history: props.settings?.about_us_history || 'Jubis Marketing was established in 2006 by founder Juberth Bisnan...',
 });

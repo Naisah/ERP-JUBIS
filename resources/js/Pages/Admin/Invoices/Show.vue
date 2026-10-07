@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { ArrowLeftIcon, CurrencyDollarIcon, TruckIcon, CheckCircleIcon, DocumentTextIcon } from '@heroicons/vue/24/outline';
 import { ref } from 'vue';
@@ -8,6 +8,7 @@ const props = defineProps({
     invoice: Object,
 });
 
+const canManageShipments = ['super_admin', 'admin', 'warehouse', 'purchasing'].includes(usePage().props.auth.user.role);
 const paymentAmount = ref('');
 
 const paymentForm = useForm({
@@ -134,14 +135,14 @@ const createShipment = () => {
                 <!-- Shipments List -->
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                     <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center"><TruckIcon class="w-5 h-5 mr-2"/> Associated Shipments</h2>
-                    <div v-if="invoice.shipments.length === 0" class="text-sm text-gray-500 py-4">No shipments have been created for this invoice yet.</div>
+                    <div v-if="canManageShipments && invoice.shipments.length === 0" class="text-sm text-gray-500 py-4">No shipments have been created for this invoice yet.</div>
                     <div v-else class="space-y-4">
                         <div v-for="shipment in invoice.shipments" :key="shipment.id" class="border rounded-md p-4 flex justify-between items-center">
                             <div>
                                 <p class="font-bold flex items-center">Tracking: <a v-if="shipment.tracking_url" :href="shipment.tracking_url" target="_blank" class="ml-2 text-blue-600 hover:underline flex items-center">{{ shipment.tracking_number }} <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 ml-1"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg></a><span v-else class="ml-2">{{ shipment.tracking_number || 'N/A' }}</span> <span class="ml-2 text-gray-500 text-sm">({{ shipment.carrier }})</span></p>
                                 <p class="text-sm text-gray-500 mt-1">Status: <span class="font-bold uppercase">{{ shipment.status }}</span></p>
                             </div>
-                            <Link :href="route('admin.shipments.index')" class="text-blue-600 text-sm font-bold hover:underline">Update Status</Link>
+                            <Link v-if="canManageShipments" :href="route('admin.shipments.index')" class="text-blue-600 text-sm font-bold hover:underline">Update Status</Link>
                         </div>
                     </div>
                 </div>

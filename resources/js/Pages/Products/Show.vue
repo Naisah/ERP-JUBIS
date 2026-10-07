@@ -1,4 +1,5 @@
 <script setup>
+import ProductImage from '@/Components/ProductImage.vue';
 import { ref, reactive } from 'vue';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
@@ -12,6 +13,7 @@ const props = defineProps({
 
 const quantity = ref(1);
 const loading = ref(false);
+const quantityError = ref('');
 
 const variantQuantities = reactive({});
 if (props.product.variants && props.product.variants.length > 0) {
@@ -21,11 +23,19 @@ if (props.product.variants && props.product.variants.length > 0) {
 }
 
 const addToQuote = (productId, qty) => {
+    if (loading.value) return;
+    const selected = productId === props.product.id ? props.product : props.product.variants.find(v => v.id === productId);
+    const amount = Number(qty);
+    quantityError.value = '';
+    if (!Number.isInteger(amount) || amount < 1 || amount > Number(selected?.stock_quantity)) {
+        quantityError.value = 'Enter a whole-number quantity between 1 and the available stock.';
+        return;
+    }
     if (!usePage().props.auth.user) {
         return router.get(route('login'));
     }
 
-    router.post(route('cart.add'), { product_id: productId, quantity: qty }, {
+    router.post(route('cart.add'), { product_id: productId, quantity: amount }, {
         preserveScroll: true,
         onStart: () => loading.value = true,
         onFinish: () => loading.value = false
@@ -40,9 +50,10 @@ const addToQuote = (productId, qty) => {
         <Head :title="`${product.name} | Jubis Marketing`" />
 
         <div class="bg-gray-50 py-8 min-h-screen">
+            <p v-if="quantityError" role="alert" class="max-w-7xl mx-auto px-4 mb-4 text-red-700">{{ quantityError }}</p>
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 
-                <nav class="flex text-sm text-gray-500 mb-8 space-x-2 items-center">
+                <nav class="flex flex-wrap text-sm text-gray-500 mb-8 space-x-2 items-center">
                     <Link :href="route('products.index')" class="hover:text-jubis-navy hover:underline">Catalog</Link>
                     <ChevronRightIcon class="w-4 h-4" />
                     <Link v-if="product.category" :href="route('products.index', { categories: product.category.id })" class="hover:text-jubis-navy hover:underline">{{ product.category.name }}</Link>
@@ -56,8 +67,8 @@ const addToQuote = (productId, qty) => {
                         <!-- Left: Image Gallery -->
                         <div class="p-8 md:p-12 flex items-center justify-center bg-white border-b md:border-b-0 md:border-r border-gray-100 relative">
                             <span v-if="product.variants && product.variants.length > 0" class="absolute top-6 left-6 z-10 bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1.5 rounded-full border border-blue-200">Multiple Options</span>
-                            <span v-else-if="!product.stock_quantity > 0" class="absolute top-6 left-6 z-10 bg-gray-800 text-white text-xs font-bold px-3 py-1.5 rounded-full">Out of Stock</span>
-                            <img :src="product.image_path || 'https://placehold.co/400x400/eeeeee/999999?text=No+Image'" :alt="product.name" class="w-full max-w-md h-auto object-contain drop-shadow-sm" />
+                            <span v-else-if="Number(product.stock_quantity) <= 0" class="absolute top-6 left-6 z-10 bg-gray-800 text-white text-xs font-bold px-3 py-1.5 rounded-full">Out of Stock</span>
+                            <ProductImage :src="product.image_path" :alt="product.name" class="w-full max-w-md h-auto object-contain drop-shadow-sm" />
                         </div>
 
                         <!-- Right: Product Info -->
@@ -102,7 +113,7 @@ const addToQuote = (productId, qty) => {
                                     </div>
                                     
                                     <!-- Add to Quote Button -->
-                                    <button :disabled="!product.stock_quantity > 0" @click="addToQuote(product.id, quantity)" class="w-full sm:flex-grow flex justify-center items-center py-3.5 px-6 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-jubis-red hover:bg-red-700 focus:outline-none transition-colors" :class="{ 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400': !product.stock_quantity > 0 }">
+                                    <button :disabled="loading || Number(product.stock_quantity) <= 0" @click="addToQuote(product.id, quantity)" class="w-full sm:flex-grow flex justify-center items-center py-3.5 px-6 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-jubis-red hover:bg-red-700 focus:outline-none transition-colors" :class="{ 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400': Number(product.stock_quantity) <= 0 }">
                                         <ShoppingCartIcon class="w-5 h-5 mr-2 stroke-2" />
                                         {{ loading ? 'Adding...' : (product.stock_quantity > 0 ? 'Add to Quote' : 'Unavailable') }}
                                     </button>
@@ -155,14 +166,14 @@ const addToQuote = (productId, qty) => {
                                             <span v-else class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">Out of Stock</span>
                                         </td>
                                         <td class="px-4 py-4">
-                                            <div class="flex items-center justify-center border border-gray-300 rounded bg-white w-28 mx-auto" :class="{'opacity-50 cursor-not-allowed': !variant.stock_quantity > 0}">
-                                                <button :disabled="!variant.stock_quantity > 0" @click="variantQuantities[variant.id] > 1 ? variantQuantities[variant.id]-- : null" class="px-2 py-1 text-gray-500 hover:text-jubis-navy hover:bg-gray-50">-</button>
-                                                <input :disabled="!variant.stock_quantity > 0" type="number" v-model="variantQuantities[variant.id]" min="1" :max="variant.stock_quantity" class="w-12 text-center border-0 focus:ring-0 text-xs font-bold p-0" />
-                                                <button :disabled="!variant.stock_quantity > 0" @click="variantQuantities[variant.id] < variant.stock_quantity ? variantQuantities[variant.id]++ : null" class="px-2 py-1 text-gray-500 hover:text-jubis-navy hover:bg-gray-50">+</button>
+                                            <div class="flex items-center justify-center border border-gray-300 rounded bg-white w-28 mx-auto" :class="{'opacity-50 cursor-not-allowed': Number(variant.stock_quantity) <= 0}">
+                                                <button :disabled="loading || Number(variant.stock_quantity) <= 0" @click="variantQuantities[variant.id] > 1 ? variantQuantities[variant.id]-- : null" class="px-2 py-1 text-gray-500 hover:text-jubis-navy hover:bg-gray-50">-</button>
+                                                <input :disabled="loading || Number(variant.stock_quantity) <= 0" type="number" v-model="variantQuantities[variant.id]" min="1" :max="variant.stock_quantity" class="w-12 text-center border-0 focus:ring-0 text-xs font-bold p-0" />
+                                                <button :disabled="loading || Number(variant.stock_quantity) <= 0" @click="variantQuantities[variant.id] < variant.stock_quantity ? variantQuantities[variant.id]++ : null" class="px-2 py-1 text-gray-500 hover:text-jubis-navy hover:bg-gray-50">+</button>
                                             </div>
                                         </td>
                                         <td class="px-4 py-4 text-right">
-                                            <button :disabled="!variant.stock_quantity > 0" @click="addToQuote(variant.id, variantQuantities[variant.id])" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-bold rounded shadow-sm text-white bg-jubis-navy hover:bg-[#071126] disabled:opacity-50 disabled:bg-gray-400 transition-colors">
+                                            <button :disabled="loading || Number(variant.stock_quantity) <= 0" @click="addToQuote(variant.id, variantQuantities[variant.id])" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-bold rounded shadow-sm text-white bg-jubis-navy hover:bg-[#071126] disabled:opacity-50 disabled:bg-gray-400 transition-colors">
                                                 Add
                                             </button>
                                         </td>
@@ -198,7 +209,7 @@ const addToQuote = (productId, qty) => {
                     <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
                         <Link v-for="related in relatedProducts" :key="related.id" :href="`/products/${related.id}`" class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col group">
                             <div class="h-48 bg-white relative p-4 flex items-center justify-center border-b border-gray-100">
-                                <img :src="related.image_path" :alt="related.name" class="w-full h-full object-contain group-hover:scale-105 transition-transform" />
+                                <ProductImage :src="related.image_path" :alt="related.name" class="w-full h-full object-contain group-hover:scale-105 transition-transform" />
                             </div>
                             <div class="p-4 flex-grow flex flex-col">
                                 <div class="text-xs text-jubis-gold font-bold uppercase tracking-wider mb-1">{{ related.brand }}</div>

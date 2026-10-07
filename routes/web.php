@@ -39,6 +39,14 @@ Route::get('/products', function (Request $request) {
         $query->whereIn('brand', $brands);
     }
 
+    $sort = $request->input('sort', 'relevant');
+    if ($sort === 'name') {
+        $query->orderBy('name');
+    } elseif ($sort === 'brand') {
+        $query->orderBy('brand')->orderBy('name');
+    }
+    $query->orderBy('id');
+
     return Inertia::render('Products/Index', [
         'products' => $query->paginate(12)->withQueryString(),
         'categories' => Category::all(),
@@ -52,7 +60,7 @@ Route::get('/products', function (Request $request) {
                 if ($brand === 'Jubis') return -1;
                 return 0;
             })->values(),
-        'filters' => $request->only(['search', 'categories', 'brands'])
+        'filters' => $request->only(['search', 'categories', 'brands', 'sort'])
     ]);
 })->name('products.index');
 
@@ -205,7 +213,6 @@ Route::post('/api/invoices/{id}/accept-terms', function ($id) {
 
 
 Route::get('/api/mock/tracking/{tracking}', function($tracking) { $shipment = \App\Models\Shipment::where('tracking_number', $tracking)->first(); return view('mock-tracking', ['tracking' => $tracking, 'shipments' => $shipment]); });
-
 
 
 

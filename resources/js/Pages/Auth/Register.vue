@@ -127,7 +127,7 @@ const submit = () => {
                                         <LockClosedIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
                                     </div>
                                     <input id="password" :type="showPassword ? 'text' : 'password'" v-model="form.password" required autocomplete="new-password" class="focus:ring-jubis-navy focus:border-jubis-navy block w-full pl-10 pr-10 sm:text-sm border-gray-300 rounded-md py-3" placeholder="••••••••" />
-                                    <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
+                                    <button type="button" :aria-label="showPassword ? 'Hide password' : 'Show password'" @click="showPassword = !showPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
                                         <EyeIcon v-if="!showPassword" class="h-5 w-5" aria-hidden="true" />
                                         <EyeSlashIcon v-else class="h-5 w-5" aria-hidden="true" />
                                     </button>
@@ -143,7 +143,7 @@ const submit = () => {
                                         <LockClosedIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
                                     </div>
                                     <input id="password_confirmation" :type="showConfirmPassword ? 'text' : 'password'" v-model="form.password_confirmation" required autocomplete="new-password" class="focus:ring-jubis-navy focus:border-jubis-navy block w-full pl-10 pr-10 sm:text-sm border-gray-300 rounded-md py-3" placeholder="••••••••" />
-                                    <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
+                                    <button type="button" :aria-label="showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'" @click="showConfirmPassword = !showConfirmPassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
                                         <EyeIcon v-if="!showConfirmPassword" class="h-5 w-5" aria-hidden="true" />
                                         <EyeSlashIcon v-else class="h-5 w-5" aria-hidden="true" />
                                     </button>

@@ -33,13 +33,13 @@ const getStatusColor = (status) => {
         
         <template #header>Review Quotation</template>
 
-        <div class="mb-6 flex items-center justify-between">
+        <div class="mb-6 flex flex-wrap gap-3 items-center justify-between">
             <Link :href="route('admin.quotes.index')" class="flex items-center text-sm font-medium text-gray-500 hover:text-jubis-navy transition-colors">
                 <ArrowLeftIcon class="w-4 h-4 mr-1" /> Back to Quotes
             </Link>
             
             <div class="flex space-x-3">
-                <button @click="updateStatus('rejected')" v-if="quote.status !== 'rejected'" class="inline-flex items-center px-4 py-2 border border-red-200 rounded-lg shadow-sm text-sm font-bold text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none transition-colors">
+                <button :disabled="form.processing" @click="updateStatus('rejected')" v-if="quote.status !== 'rejected'" class="inline-flex items-center px-4 py-2 border border-red-200 rounded-lg shadow-sm text-sm font-bold text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none transition-colors">
                     <XCircleIcon class="h-5 w-5 mr-1.5" /> Reject Quote
                 </button>
                 <button @click="updateStatus('approved')" v-if="quote.status !== 'approved'" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-green-600 hover:bg-green-700 focus:outline-none transition-colors">

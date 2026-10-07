@@ -1,5 +1,6 @@
 <script setup>
-import { ref, watch } from 'vue';
+import ProductImage from '@/Components/ProductImage.vue';
+import { ref, watch, onBeforeUnmount } from 'vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { MagnifyingGlassIcon, FunnelIcon, ShoppingCartIcon, LockClosedIcon } from '@heroicons/vue/24/outline';
@@ -18,9 +19,8 @@ const selectedCategories = ref(props.filters?.categories ? props.filters.categor
 const selectedBrands = ref(props.filters?.brands ? props.filters.brands.split(',') : []);
 const sortOrder = ref(props.filters?.sort || 'relevant');
 
-watch(
-    [searchQuery, selectedCategories, selectedBrands, sortOrder],
-    debounce(([search, categories, brands, sort]) => {
+const updateFilters = debounce(([search, categories, brands, sort]) => {
+        if (search === (props.filters?.search || '') && categories.join(',') === (props.filters?.categories || '') && brands.join(',') === (props.filters?.brands || '') && sort === (props.filters?.sort || 'relevant')) return;
         router.get('/products', {
             search: search,
             categories: categories.join(','),
@@ -31,11 +31,19 @@ watch(
             preserveScroll: true,
             replace: true,
         });
-    }, 300),
-    { deep: true }
-);
+    }, 300);
+watch([searchQuery, selectedCategories, selectedBrands, sortOrder], values => updateFilters(values), { deep: true });
+watch(() => props.filters, filters => {
+    updateFilters.cancel();
+    searchQuery.value = filters?.search || '';
+    selectedCategories.value = filters?.categories ? filters.categories.split(',').map(Number) : [];
+    selectedBrands.value = filters?.brands ? filters.brands.split(',') : [];
+    sortOrder.value = filters?.sort || 'relevant';
+}, { flush: 'sync' });
+onBeforeUnmount(() => updateFilters.cancel());
 
 const addToQuote = (productId) => {
+    if (loadingId.value !== null) return;
     if (!usePage().props.auth.user) {
         return router.get(route('login'));
     }
@@ -103,8 +111,8 @@ const addToQuote = (productId) => {
                     </div>
 
                     <!-- Product Grid -->
-                    <div class="flex-grow">
-                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex justify-between items-center text-sm">
+                    <div class="flex-grow min-w-0">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-wrap gap-3 justify-between items-center text-sm">
                             <span class="text-gray-500">Showing <span class="font-bold text-gray-800">{{ products.total }}</span> results</span>
                             <div class="flex items-center space-x-2">
                                 <span class="text-gray-500 font-medium">Sort by:</span>
@@ -116,22 +124,22 @@ const addToQuote = (productId) => {
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             <!-- Product Card -->
-                            <Link :href="`/products/${product.id}`" v-for="product in products.data" :key="product.id" class="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col group relative">
+                            <article v-for="product in products.data" :key="product.id" class="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col group relative">
                                 
                                 <!-- Out of Stock Overlay -->
-                                <div v-if="!product.stock_quantity > 0" class="absolute top-3 right-3 z-10 bg-gray-800/90 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm backdrop-blur-sm">
+                                <div v-if="!product.variants?.length && Number(product.stock_quantity) <= 0" class="absolute top-3 right-3 z-10 bg-gray-800/90 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm backdrop-blur-sm">
                                     Out of Stock
                                 </div>
                                 
                                 <!-- Image Display -->
-                                <div class="h-56 bg-white relative p-4 flex items-center justify-center border-b border-gray-100 group-hover:bg-gray-50 transition-colors overflow-hidden">
-                                    <img :src="product.image_path || 'https://placehold.co/400x400/eeeeee/999999?text=No+Image'" :alt="product.name" class="w-full h-full object-contain drop-shadow-sm transform group-hover:scale-105 transition-transform duration-300" />
-                                </div>
+                                <Link :href="`/products/${product.id}`" class="h-56 bg-white relative p-4 flex items-center justify-center border-b border-gray-100 group-hover:bg-gray-50 transition-colors overflow-hidden">
+                                    <ProductImage :src="product.image_path" :alt="product.name" class="w-full h-full object-contain drop-shadow-sm transform group-hover:scale-105 transition-transform duration-300" />
+                                </Link>
                                 
                                 <div class="p-5 flex-grow flex flex-col">
                                     <div class="text-xs text-jubis-gold font-bold uppercase tracking-wider mb-1">{{ product.brand }}</div>
                                     <h3 class="font-bold text-jubis-navy text-[15px] mb-2 line-clamp-2 leading-snug group-hover:text-jubis-red transition-colors cursor-pointer">
-                                        {{ product.name }}
+                                        <Link :href="`/products/${product.id}`">{{ product.name }}</Link>
                                     </h3>
                                     <p class="text-xs text-gray-500 mb-5">SKU: {{ product.sku }}</p>
                                     
@@ -157,14 +165,14 @@ const addToQuote = (productId) => {
                                             </Link>
                                         </div>
                                         <div v-else>
-                                            <button :disabled="!product.stock_quantity > 0" @click.prevent="product.stock_quantity > 0 ? addToQuote(product.id) : null" class="w-full flex items-center justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-jubis-navy hover:bg-[#071126] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-jubis-navy transition-colors" :class="{ 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400': !product.stock_quantity > 0 }">
+                                            <button :disabled="Number(product.stock_quantity) <= 0 || loadingId !== null" @click.prevent="product.stock_quantity > 0 ? addToQuote(product.id) : null" class="w-full flex items-center justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-jubis-navy hover:bg-[#071126] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-jubis-navy transition-colors" :class="{ 'opacity-50 cursor-not-allowed bg-gray-400 hover:bg-gray-400': Number(product.stock_quantity) <= 0 }">
                                                 <ShoppingCartIcon class="w-4 h-4 mr-2 stroke-2" />
                                                 {{ loadingId === product.id ? 'Adding...' : (product.stock_quantity > 0 ? 'Add to Quote' : 'Unavailable') }}
                                             </button>
                                         </div>
                                     </div>
                                 </div>
-                            </Link>
+                            </article>
                         </div>
                         
                         <!-- Empty State -->
@@ -174,7 +182,7 @@ const addToQuote = (productId) => {
                         
                         <!-- Pagination -->
                         <div class="mt-12 flex justify-center" v-if="products.links && products.links.length > 3">
-                            <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
+                            <nav class="relative z-0 inline-flex flex-wrap justify-center rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
                                 <template v-for="(link, pIndex) in products.links" :key="pIndex">
                                     <div v-if="link.url === null" class="relative inline-flex items-center px-4 py-2 border border-gray-200 bg-gray-50 text-sm font-medium text-gray-400 cursor-not-allowed" v-html="link.label"></div>
                                     <Link v-else :href="link.url" preserve-scroll preserve-state class="relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-colors" :class="link.active ? 'z-10 bg-jubis-navy text-white border-jubis-navy' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'" v-html="link.label" />
@@ -204,7 +212,6 @@ const addToQuote = (productId) => {
     background: #94a3b8; 
 }
 </style>
-
 
 
 

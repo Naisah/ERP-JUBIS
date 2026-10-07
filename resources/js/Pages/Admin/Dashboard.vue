@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { ChartBarIcon, CurrencyDollarIcon, DocumentTextIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
 import { computed } from 'vue';
@@ -16,6 +16,9 @@ const props = defineProps({
     recentInvoices: Array,
     reorderList: Array,
 });
+
+const role = usePage().props.auth.user.role;
+const allowed = (roles) => ['admin', 'super_admin', ...roles].includes(role);
 
 // Bar Chart Configuration
 const barChartData = computed(() => ({
@@ -129,7 +132,7 @@ const doughnutChartOptions = {
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 border-b flex justify-between items-center">
                         <h2 class="text-lg font-bold text-gray-900">Recent Invoices</h2>
-                        <Link :href="route('admin.invoices.index')" class="text-sm text-blue-600 hover:underline">View All</Link>
+                        <Link v-if="allowed(['finance'])" :href="route('admin.invoices.index')" class="text-sm text-blue-600 hover:underline">View All</Link>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 text-sm">
@@ -179,7 +182,7 @@ const doughnutChartOptions = {
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                     <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
                         <h2 class="text-lg font-bold text-gray-900">Recent Quotes</h2>
-                        <Link :href="route('admin.quotes.index')" class="text-sm text-blue-600 hover:underline">View All</Link>
+                        <Link v-if="allowed(['sales', 'finance'])" :href="route('admin.quotes.index')" class="text-sm text-blue-600 hover:underline">View All</Link>
                     </div>
                     <ul class="divide-y divide-gray-200">
                         <li v-for="quote in recentQuotes" :key="quote.id" class="px-6 py-4 hover:bg-gray-50">
@@ -189,7 +192,7 @@ const doughnutChartOptions = {
                             </div>
                             <div class="text-sm text-gray-500 mt-1">{{ quote.user?.company_name || quote.user?.name }}</div>
                             <div class="mt-2 text-right">
-                                <Link :href="route('admin.quotes.show', quote.id)" class="text-xs text-blue-600 font-bold hover:underline">Review Quote &rarr;</Link>
+                                <Link v-if="allowed(['sales', 'finance'])" :href="route('admin.quotes.show', quote.id)" class="text-xs text-blue-600 font-bold hover:underline">Review Quote &rarr;</Link>
                             </div>
                         </li>
                         <li v-if="recentQuotes.length === 0" class="px-6 py-8 text-center text-gray-500 text-sm">No quotes found.</li>
@@ -218,7 +221,7 @@ const doughnutChartOptions = {
                         <li v-if="reorderList.length === 0" class="px-6 py-8 text-center text-gray-500 text-sm">Inventory levels are healthy.</li>
                     </ul>
                     <div class="bg-gray-50 px-6 py-3 border-t">
-                        <Link :href="route('admin.purchase-orders.create')" class="text-sm font-medium text-jubis-navy hover:underline flex justify-center items-center">
+                        <Link v-if="allowed(['purchasing'])" :href="route('admin.purchase-orders.create')" class="text-sm font-medium text-jubis-navy hover:underline flex justify-center items-center">
                             Create Purchase Order &rarr;
                         </Link>
                     </div>
