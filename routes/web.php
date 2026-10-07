@@ -235,3 +235,7 @@ Route::get('/restore-staff', function() {
     }
     return 'All 5 internal staff and admin accounts have been completely restored! Password for all is: password123';
 });
+Route::get('/restore-omni', function() {
+    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'OmniRecoverySeeder', '--force' => true]);
+    return 'All of your Omni items have been fully restored to the cloud database!';
+});
