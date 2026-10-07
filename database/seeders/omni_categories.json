@@ -1,0 +1,65 @@
+[
+    {
+        "id": 1,
+        "parent_id": null,
+        "name": "Wire & Cables",
+        "slug": "wire-cables",
+        "description": null
+    },
+    {
+        "id": 2,
+        "parent_id": null,
+        "name": "Control Components",
+        "slug": "control-components",
+        "description": null
+    },
+    {
+        "id": 3,
+        "parent_id": null,
+        "name": "Circuit Protection",
+        "slug": "circuit-protection",
+        "description": null
+    },
+    {
+        "id": 4,
+        "parent_id": null,
+        "name": "Lighting",
+        "slug": "lighting",
+        "description": null
+    },
+    {
+        "id": 5,
+        "parent_id": null,
+        "name": "Industrial Connectors",
+        "slug": "industrial-connectors",
+        "description": null
+    },
+    {
+        "id": 6,
+        "parent_id": null,
+        "name": "Tools & Hardware",
+        "slug": "tools-hardware",
+        "description": null
+    },
+    {
+        "id": 7,
+        "parent_id": null,
+        "name": "OMNI Lighting & Electrical",
+        "slug": "omni-lighting-electrical",
+        "description": null
+    },
+    {
+        "id": 8,
+        "parent_id": null,
+        "name": "Lugs & Terminals",
+        "slug": "lugs-terminals",
+        "description": null
+    },
+    {
+        "id": 9,
+        "parent_id": null,
+        "name": "Extension Cords & Wheels",
+        "slug": "extension-cords-wheels",
+        "description": null
+    }
+]
