@@ -6,8 +6,6 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Category;
-use App\Models\Product;
 
 class MasterRecoverySeeder extends Seeder
 {
@@ -30,20 +28,24 @@ class MasterRecoverySeeder extends Seeder
         $catJson = File::get(database_path('seeders/master_categories.json'));
         $categories = json_decode($catJson, true);
         if ($categories) {
-            foreach (array_chunk($fixDates($categories), 50) as $chunk) {
-                Category::upsert($chunk, ['id'], ['name', 'slug', 'parent_id', 'description']);
+            foreach ($fixDates($categories) as $cat) {
+                try {
+                    DB::table('categories')->insert($cat);
+                } catch (\Exception $e) {
+                    // Ignore duplicates
+                }
             }
         }
 
         $prodJson = File::get(database_path('seeders/master_products.json'));
         $products = json_decode($prodJson, true);
         if ($products) {
-            foreach (array_chunk($fixDates($products), 50) as $chunk) {
-                Product::upsert($chunk, ['id'], [
-                    'category_id', 'name', 'sku', 'brand', 'description', 
-                    'image_path', 'stock_quantity', 'reorder_level', 
-                    'unit_of_measure', 'wholesale_price', 'average_cost', 'is_active', 'parent_id'
-                ]);
+            foreach ($fixDates($products) as $prod) {
+                try {
+                    DB::table('products')->insert($prod);
+                } catch (\Exception $e) {
+                    // Ignore duplicates
+                }
             }
         }
 
