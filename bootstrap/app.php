@@ -21,6 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
 
+        $middleware->trustProxies(at: '*');
+
         $middleware->validateCsrfTokens(except: [
             '/webhooks/paymongo'
         ]);
