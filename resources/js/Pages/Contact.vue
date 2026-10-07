@@ -1,6 +1,23 @@
 <script setup>
+import { useForm } from '@inertiajs/vue3';
 import { Head } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
+
+const form = useForm({
+    first_name: '',
+    last_name: '',
+    company: '',
+    email: '',
+    phone: '',
+    message: ''
+});
+
+const submit = () => {
+    form.post(route('contact.submit'), {
+        preserveScroll: true,
+        onSuccess: () => form.reset(),
+    });
+};
 import { MapPinIcon, PhoneIcon, EnvelopeIcon, ClockIcon } from '@heroicons/vue/24/outline';
 </script>
 
@@ -25,21 +42,21 @@ import { MapPinIcon, PhoneIcon, EnvelopeIcon, ClockIcon } from '@heroicons/vue/2
                     <!-- Contact Form -->
                     <div class="bg-gray-50 p-8 rounded-xl border border-gray-100">
                         <h2 class="text-2xl font-bold text-jubis-navy mb-6">Send us a Message</h2>
-                        <form class="space-y-6" @submit.prevent="">
+                        <form class="space-y-6" @submit.prevent="submit">
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700">First Name</label>
-                                    <input type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
+                                    <input v-model="form.first_name" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700">Last Name</label>
-                                    <input type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
+                                    <input v-model="form.first_name" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
                                 </div>
                             </div>
                             
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700">Company Name</label>
-                                <input type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
+                                <input v-model="form.first_name" type="text" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-jubis-navy focus:border-jubis-navy" />
                             </div>
 
                             <div>
@@ -122,3 +139,4 @@ import { MapPinIcon, PhoneIcon, EnvelopeIcon, ClockIcon } from '@heroicons/vue/2
         </div>
     </PublicLayout>
 </template>
+
