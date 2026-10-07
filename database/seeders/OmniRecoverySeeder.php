@@ -10,7 +10,7 @@ class OmniRecoverySeeder extends Seeder
 {
     public function run()
     {
-        $json = File::get(storage_path('app/omni_products.json'));
+        $json = File::get(database_path('seeders/omni_products.json'));
         $products = json_decode($json, true);
         
         foreach (array_chunk($products, 50) as $chunk) {
