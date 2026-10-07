@@ -28,7 +28,7 @@ class MasterRecoverySeeder extends Seeder
                 $cleanCats[] = $cat;
             }
             foreach (array_chunk($cleanCats, 100) as $chunk) {
-                DB::table('categories')->insert($chunk);
+                DB::table('categories')->insertOrIgnore($chunk);
             }
         }
 
@@ -44,7 +44,7 @@ class MasterRecoverySeeder extends Seeder
                 $cleanProds[] = $prod;
             }
             foreach (array_chunk($cleanProds, 100) as $chunk) {
-                DB::table('products')->insert($chunk);
+                DB::table('products')->insertOrIgnore($chunk);
             }
         }
 
