@@ -6,12 +6,15 @@ use Illuminate\Database\Seeder;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 
 class OmniRecoverySeeder extends Seeder
 {
     public function run()
     {
-        // 1. Recover Categories First (so foreign keys match)
+        Schema::disableForeignKeyConstraints();
+
+        // 1. Recover Categories First
         $catJson = File::get(database_path('seeders/omni_categories.json'));
         $categories = json_decode($catJson, true);
         
@@ -32,8 +35,10 @@ class OmniRecoverySeeder extends Seeder
             Product::upsert($chunk, ['id'], [
                 'category_id', 'name', 'sku', 'brand', 'description', 
                 'image_path', 'stock_quantity', 'reorder_level', 
-                'unit_of_measure', 'wholesale_price', 'average_cost', 'is_active'
+                'unit_of_measure', 'wholesale_price', 'average_cost', 'is_active', 'parent_id'
             ]);
         }
+
+        Schema::enableForeignKeyConstraints();
     }
 }
