@@ -16,7 +16,6 @@ class OmniRecoverySeeder extends Seeder
         foreach ($products as &$product) {
             unset($product['specifications']);
             unset($product['parent']);
-            unset($product['image_path']); // Just in case of duplicates or mismatch, but wait, image_path is valid.
         }
         
         foreach (array_chunk($products, 50) as $chunk) {
