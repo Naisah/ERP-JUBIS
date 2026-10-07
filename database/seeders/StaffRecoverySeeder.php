@@ -13,11 +13,14 @@ class StaffRecoverySeeder extends Seeder
         $json = File::get(database_path('seeders/staff_backup.json'));
         $staff = json_decode($json, true);
 
-        foreach ($staff as $account) {
-            User::updateOrCreate(
-                ['email' => $account['email']],
-                $account
-            );
+        if (is_array($staff)) {
+            foreach ($staff as $account) {
+                unset($account['id']);
+                User::updateOrCreate(
+                    ['email' => $account['email']],
+                    $account
+                );
+            }
         }
     }
 }
