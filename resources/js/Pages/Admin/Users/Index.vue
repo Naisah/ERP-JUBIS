@@ -1,334 +1,336 @@
-<script setup>
-import { ref } from 'vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
-import AdminLayout from '@/Layouts/AdminLayout.vue';
-import Modal from '@/Components/Modal.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import TextInput from '@/Components/TextInput.vue';
-import InputError from '@/Components/InputError.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import { UserIcon, ShieldCheckIcon, PencilSquareIcon, TrashIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
-import debounce from 'lodash/debounce';
-
-const props = defineProps({
-    users: Object,
-    filters: Object,
-});
-
-const search = ref(props.filters.search || '');
-const roleFilter = ref(props.filters.role || 'all');
-const typeFilter = ref(props.filters.type || 'client');
-
-const updateSearch = debounce(() => {
-    router.get(route('admin.users.index'), {
-        search: search.value,
-        role: roleFilter.value,
-        type: typeFilter.value
-    }, { preserveState: true, replace: true });
-}, 300);
-
-const setType = (type) => {
-    typeFilter.value = type;
-    roleFilter.value = 'all'; // reset role filter when switching tabs
-    updateSearch();
-};
-
-const showCreateModal = ref(false);
-const showEditModal = ref(false);
-
-const form = useForm({
-    name: '',
-    email: '',
-    password: '',
-    role: 'client',
-    company_name: '',
-});
-
-const editForm = useForm({
-    id: null,
-    name: '',
-    email: '',
-    password: '',
-    role: '',
-    company_name: '',
-    credit_status: '',
-});
-
-const openCreateModal = () => {
-    form.reset();
-    form.clearErrors();
-    showCreateModal.value = true;
-};
-
-const openEditModal = (user) => {
-    editForm.reset();
-    editForm.clearErrors();
-    editForm.id = user.id;
-    editForm.name = user.name;
-    editForm.email = user.email;
-    editForm.role = user.role;
-    editForm.company_name = user.company_name || '';
-    editForm.credit_status = user.credit_status || 'pending';
-    showEditModal.value = true;
-};
-
-const submitCreate = () => {
-    form.post(route('admin.users.store'), {
-        onSuccess: () => showCreateModal.value = false,
-    });
-};
-
-const submitEdit = () => {
-    editForm.put(route('admin.users.update', editForm.id), {
-        onSuccess: () => showEditModal.value = false,
-    });
-};
-
-const deleteUser = (id) => {
-    if (confirm('Are you sure you want to delete this user?')) {
-        router.delete(route('admin.users.destroy', id), {
-            preserveState: true,
-            preserveScroll: true
-        });
-    }
-};
-
-const roles = [
-    { value: 'client', label: 'Client (B2B Buyer)', color: 'bg-gray-100 text-gray-800' },
-    { value: 'sales', label: 'Sales Staff', color: 'bg-purple-100 text-purple-800' },
-    { value: 'purchasing', label: 'Purchasing Staff', color: 'bg-blue-100 text-blue-800' },
-    { value: 'warehouse', label: 'Warehouse Staff', color: 'bg-amber-100 text-amber-800' },
-    { value: 'finance', label: 'Finance Staff', color: 'bg-green-100 text-green-800' },
-    { value: 'admin', label: 'Admin', color: 'bg-red-100 text-red-800' },
-    { value: 'super_admin', label: 'Super Admin', color: 'bg-red-200 text-red-900 font-bold' },
-];
-
-const getRoleBadge = (role) => {
-    const found = roles.find(r => r.value === role);
-    return found ? found.color : 'bg-gray-100 text-gray-800';
-};
-const getRoleLabel = (role) => {
-    const found = roles.find(r => r.value === role);
-    return found ? found.label : role;
-};
-</script>
-
-<template>
-    <AdminLayout>
-        <Head title="User Management | Admin" />
-        <template #header>User Management</template>
-
-        <!-- Tabs -->
-        <div class="mb-6 border-b border-gray-200">
-            <nav class="-mb-px flex space-x-8">
-                <button @click="setType('client')" :class="[typeFilter === 'client' ? 'border-jubis-navy text-jubis-navy' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300', 'whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors']">
-                    B2B Clients
-                </button>
-                <button @click="setType('staff')" :class="[typeFilter === 'staff' ? 'border-jubis-navy text-jubis-navy' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300', 'whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm transition-colors']">
-                    Internal Staff & Admins
-                </button>
-            </nav>
-        </div>
-
-        <div class="mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div class="flex flex-1 gap-4 w-full md:w-auto">
-                <div class="relative flex-1 max-w-md">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input v-model="search" @input="updateSearch" type="text" placeholder="Search users, emails, companies..." class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-jubis-navy focus:border-jubis-navy sm:text-sm" />
-                </div>
-                <select v-if="typeFilter === 'staff'" v-model="roleFilter" @change="updateSearch" class="block pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-jubis-navy focus:border-jubis-navy sm:text-sm rounded-md">
-                    <option value="all">All Roles</option>
-                    <option v-for="r in roles.filter(x => x.value !== 'client')" :key="r.value" :value="r.value">{{ r.label }}</option>
-                </select>
-            </div>
-            
-            <button @click="openCreateModal" class="inline-flex items-center px-4 py-2 bg-jubis-navy border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#071126] focus:bg-[#071126] active:bg-[#071126] focus:outline-none focus:ring-2 focus:ring-jubis-navy focus:ring-offset-2 transition ease-in-out duration-150">
-                <UserIcon class="w-4 h-4 mr-2" />
-                Add {{ typeFilter === 'staff' ? 'Staff' : 'Client' }}
-            </button>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Name / Company</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Email</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">System Role</th>`n<th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Account Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Joined</th>
-                            <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <tr v-for="user in users.data" :key="user.id" class="hover:bg-gray-50">
-                            <td class="px-6 py-4">
-                                <div class="font-bold text-gray-900">{{ user.name }}</div>
-                                <div class="text-sm text-gray-500">{{ user.company_name || '—' }}</div>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-600">{{ user.email }}</td>
-                            
-<td class="px-6 py-4">
-    <span :class="[getRoleBadge(user.role), 'px-2.5 py-0.5 rounded-full text-xs font-medium uppercase']">
-        {{ getRoleLabel(user.role) }}
-    </span>
-</td>
-<td class="px-6 py-4">
-    <span v-if="user.role === 'client'" :class="[user.credit_status === 'approved' ? 'bg-green-100 text-green-800' : (user.credit_status === 'suspended' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'), 'px-2.5 py-0.5 rounded-full text-xs font-medium uppercase']">
-        {{ user.credit_status }}
-    </span>
-    <span v-else class="text-gray-400 text-xs">�</span>
-</td>
-                            <td class="px-6 py-4 text-sm text-gray-500">{{ new Date(user.created_at).toLocaleDateString() }}</td>
-                            <td class="px-6 py-4 text-right text-sm font-medium">
-                                <button @click="openEditModal(user)" class="text-blue-600 hover:text-blue-900 mr-4" title="Edit User">
-                                    <PencilSquareIcon class="w-5 h-5 inline" />
-                                </button>
-                                <button v-if="$page.props.auth.user.id !== user.id" @click="deleteUser(user.id)" class="text-red-600 hover:text-red-900" title="Delete User">
-                                    <TrashIcon class="w-5 h-5 inline" />
-                                </button>
-                            </td>
-                        </tr>
-                        <tr v-if="users.data.length === 0">
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500 font-medium">No users found matching your search.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Pagination -->
-            <div v-if="users.links.length > 3" class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                <div class="flex-1 flex justify-center">
-                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                        <Link v-for="(link, k) in users.links" :key="k"
-                            :href="link.url || '#'"
-                            :class="[
-                                link.active ? 'z-10 bg-blue-50 border-jubis-navy text-jubis-navy' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50',
-                                !link.url ? 'opacity-50 cursor-not-allowed' : '',
-                                'relative inline-flex items-center px-4 py-2 border text-sm font-medium'
-                            ]"
-                            v-html="link.label" />
-                    </nav>
-                </div>
-            </div>
-        </div>
-
-        <!-- Create User Modal -->
-        <Modal :show="showCreateModal" @close="showCreateModal = false" maxWidth="md">
-            <div class="p-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                    <UserIcon class="w-5 h-5 mr-2 text-jubis-navy" /> Add New User
-                </h2>
-                
-                <form @submit.prevent="submitCreate">
-                    <div class="space-y-4">
-                        <div>
-                            <InputLabel for="name" value="Full Name" />
-                            <TextInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" required />
-                            <InputError :message="form.errors.name" class="mt-2" />
-                        </div>
-                        
-                        <div>
-                            <InputLabel for="email" value="Email Address" />
-                            <TextInput id="email" v-model="form.email" type="email" class="mt-1 block w-full" required />
-                            <InputError :message="form.errors.email" class="mt-2" />
-                        </div>
-
-                        <div>
-                            <InputLabel for="company_name" value="Company Name (Optional)" />
-                            <TextInput id="company_name" v-model="form.company_name" type="text" class="mt-1 block w-full" />
-                            <InputError :message="form.errors.company_name" class="mt-2" />
-                        </div>
-
-                        <div>
-                            <InputLabel for="password" value="Password" />
-                            <TextInput id="password" v-model="form.password" type="password" class="mt-1 block w-full" required />
-                            <InputError :message="form.errors.password" class="mt-2" />
-                        </div>
-
-                        <div>
-                            <InputLabel for="role" value="System Role" />
-                            <select id="role" v-model="form.role" class="mt-1 block w-full border-gray-300 focus:border-jubis-navy focus:ring-jubis-navy rounded-md shadow-sm">
-                                <option v-for="r in roles" :key="r.value" :value="r.value">{{ r.label }}</option>
-                            </select>
-                            <p class="mt-1 text-xs text-gray-500">Determines which sections of the Admin Panel this user can access.</p>
-                            <InputError :message="form.errors.role" class="mt-2" />
-                        </div>
-                    </div>
-
-                    <div class="mt-6 flex justify-end space-x-3">
-                        <SecondaryButton @click="showCreateModal = false">Cancel</SecondaryButton>
-                        <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">Create User</PrimaryButton>
-                    </div>
-                </form>
-            </div>
-        </Modal>
-
-        <!-- Edit User Modal -->
-        <Modal :show="showEditModal" @close="showEditModal = false" maxWidth="md">
-            <div class="p-6">
-                <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center">
-                    <PencilSquareIcon class="w-5 h-5 mr-2 text-jubis-navy" /> Edit User
-                </h2>
-                
-                <form @submit.prevent="submitEdit">
-                    <div class="space-y-4">
-                        <div>
-                            <InputLabel for="edit_name" value="Full Name" />
-                            <TextInput id="edit_name" v-model="editForm.name" type="text" class="mt-1 block w-full" required />
-                            <InputError :message="editForm.errors.name" class="mt-2" />
-                        </div>
-                        
-                        <div>
-                            <InputLabel for="edit_email" value="Email Address" />
-                            <TextInput id="edit_email" v-model="editForm.email" type="email" class="mt-1 block w-full" required />
-                            <InputError :message="editForm.errors.email" class="mt-2" />
-                        </div>
-
-                        <div>
-                            <InputLabel for="edit_company_name" value="Company Name (Optional)" />
-                            <TextInput id="edit_company_name" v-model="editForm.company_name" type="text" class="mt-1 block w-full" />
-                            <InputError :message="editForm.errors.company_name" class="mt-2" />
-                        </div>
-
-                        <div>
-                            <InputLabel for="edit_role" value="System Role" />
-                            <select id="edit_role" v-model="editForm.role" class="mt-1 block w-full border-gray-300 focus:border-jubis-navy focus:ring-jubis-navy rounded-md shadow-sm">
-                                <option v-for="r in roles" :key="r.value" :value="r.value">{{ r.label }}</option>
-                            </select>
-                            <InputError :message="editForm.errors.role" class="mt-2" />
-                        </div>
-
-                        <div v-if="editForm.role === 'client'">
-                            <InputLabel for="edit_credit_status" value="Account Status (B2B Approval)" />
-                            <select id="edit_credit_status" v-model="editForm.credit_status" class="mt-1 block w-full border-gray-300 focus:border-jubis-navy focus:ring-jubis-navy rounded-md shadow-sm">
-                                <option value="pending">Pending Approval</option>
-                                <option value="approved">Approved</option>
-                                <option value="suspended">Suspended</option>
-                            </select>
-                            <InputError :message="editForm.errors.credit_status" class="mt-2" />
-                        </div>
-                        
-                        <hr class="my-4" />
-                        
-                        <div>
-                            <InputLabel for="edit_password" value="New Password (Leave blank to keep current)" />
-                            <TextInput id="edit_password" v-model="editForm.password" type="password" class="mt-1 block w-full" />
-                            <InputError :message="editForm.errors.password" class="mt-2" />
-                        </div>
-                    </div>
-
-                    <div class="mt-6 flex justify-end space-x-3">
-                        <SecondaryButton @click="showEditModal = false">Cancel</SecondaryButton>
-                        <PrimaryButton :class="{ 'opacity-25': editForm.processing }" :disabled="editForm.processing">Save Changes</PrimaryButton>
-                    </div>
-                </form>
-            </div>
-        </Modal>
-    </AdminLayout>
-</template>
-
-
+﻿—<—s—c—r—i—p—t— —s—e—t—u—p—>——
+—i—m—p—o—r—t— —{— —r—e—f— —}— —f—r—o—m— —'—v—u—e—'—;——
+—i—m—p—o—r—t— —{— —H—e—a—d—,— —r—o—u—t—e—r—,— —u—s—e—F—o—r—m— —}— —f—r—o—m— —'—@—i—n—e—r—t—i—a—j—s—/—v—u—e—3—'—;——
+—i—m—p—o—r—t— —A—d—m—i—n—L—a—y—o—u—t— —f—r—o—m— —'—@—/—L—a—y—o—u—t—s—/—A—d—m—i—n—L—a—y—o—u—t—.—v—u—e—'—;——
+—i—m—p—o—r—t— —M—o—d—a—l— —f—r—o—m— —'—@—/—C—o—m—p—o—n—e—n—t—s—/—M—o—d—a—l—.—v—u—e—'—;——
+—i—m—p—o—r—t— —I—n—p—u—t—L—a—b—e—l— —f—r—o—m— —'—@—/—C—o—m—p—o—n—e—n—t—s—/—I—n—p—u—t—L—a—b—e—l—.—v—u—e—'—;——
+—i—m—p—o—r—t— —T—e—x—t—I—n—p—u—t— —f—r—o—m— —'—@—/—C—o—m—p—o—n—e—n—t—s—/—T—e—x—t—I—n—p—u—t—.—v—u—e—'—;——
+—i—m—p—o—r—t— —I—n—p—u—t—E—r—r—o—r— —f—r—o—m— —'—@—/—C—o—m—p—o—n—e—n—t—s—/—I—n—p—u—t—E—r—r—o—r—.—v—u—e—'—;——
+—i—m—p—o—r—t— —P—r—i—m—a—r—y—B—u—t—t—o—n— —f—r—o—m— —'—@—/—C—o—m—p—o—n—e—n—t—s—/—P—r—i—m—a—r—y—B—u—t—t—o—n—.—v—u—e—'—;——
+—i—m—p—o—r—t— —S—e—c—o—n—d—a—r—y—B—u—t—t—o—n— —f—r—o—m— —'—@—/—C—o—m—p—o—n—e—n—t—s—/—S—e—c—o—n—d—a—r—y—B—u—t—t—o—n—.—v—u—e—'—;——
+—i—m—p—o—r—t— —{— —U—s—e—r—I—c—o—n—,— —S—h—i—e—l—d—C—h—e—c—k—I—c—o—n—,— —P—e—n—c—i—l—S—q—u—a—r—e—I—c—o—n—,— —T—r—a—s—h—I—c—o—n—,— —M—a—g—n—i—f—y—i—n—g—G—l—a—s—s—I—c—o—n— —}— —f—r—o—m— —'—@—h—e—r—o—i—c—o—n—s—/—v—u—e—/—2—4—/—o—u—t—l—i—n—e—'—;——
+—i—m—p—o—r—t— —d—e—b—o—u—n—c—e— —f—r—o—m— —'—l—o—d—a—s—h—/—d—e—b—o—u—n—c—e—'—;——
+——
+—c—o—n—s—t— —p—r—o—p—s— —=— —d—e—f—i—n—e—P—r—o—p—s—(—{——
+— — — — —u—s—e—r—s—:— —O—b—j—e—c—t—,——
+— — — — —f—i—l—t—e—r—s—:— —O—b—j—e—c—t—,——
+—}—)—;——
+——
+—c—o—n—s—t— —s—e—a—r—c—h— —=— —r—e—f—(—p—r—o—p—s—.—f—i—l—t—e—r—s—.—s—e—a—r—c—h— —|—|— —'—'—)—;——
+—c—o—n—s—t— —r—o—l—e—F—i—l—t—e—r— —=— —r—e—f—(—p—r—o—p—s—.—f—i—l—t—e—r—s—.—r—o—l—e— —|—|— —'—a—l—l—'—)—;——
+—c—o—n—s—t— —t—y—p—e—F—i—l—t—e—r— —=— —r—e—f—(—p—r—o—p—s—.—f—i—l—t—e—r—s—.—t—y—p—e— —|—|— —'—c—l—i—e—n—t—'—)—;——
+——
+—c—o—n—s—t— —u—p—d—a—t—e—S—e—a—r—c—h— —=— —d—e—b—o—u—n—c—e—(—(—)— —=—>— —{——
+— — — — —r—o—u—t—e—r—.—g—e—t—(—r—o—u—t—e—(—'—a—d—m—i—n—.—u—s—e—r—s—.—i—n—d—e—x—'—)—,— —{——
+— — — — — — — — —s—e—a—r—c—h—:— —s—e—a—r—c—h—.—v—a—l—u—e—,——
+— — — — — — — — —r—o—l—e—:— —r—o—l—e—F—i—l—t—e—r—.—v—a—l—u—e—,——
+— — — — — — — — —t—y—p—e—:— —t—y—p—e—F—i—l—t—e—r—.—v—a—l—u—e——
+— — — — —}—,— —{— —p—r—e—s—e—r—v—e—S—t—a—t—e—:— —t—r—u—e—,— —r—e—p—l—a—c—e—:— —t—r—u—e— —}—)—;——
+—}—,— —3—0—0—)—;——
+——
+—c—o—n—s—t— —s—e—t—T—y—p—e— —=— —(—t—y—p—e—)— —=—>— —{——
+— — — — —t—y—p—e—F—i—l—t—e—r—.—v—a—l—u—e— —=— —t—y—p—e—;——
+— — — — —r—o—l—e—F—i—l—t—e—r—.—v—a—l—u—e— —=— —'—a—l—l—'—;— —/—/— —r—e—s—e—t— —r—o—l—e— —f—i—l—t—e—r— —w—h—e—n— —s—w—i—t—c—h—i—n—g— —t—a—b—s——
+— — — — —u—p—d—a—t—e—S—e—a—r—c—h—(—)—;——
+—}—;——
+——
+—c—o—n—s—t— —s—h—o—w—C—r—e—a—t—e—M—o—d—a—l— —=— —r—e—f—(—f—a—l—s—e—)—;——
+—c—o—n—s—t— —s—h—o—w—E—d—i—t—M—o—d—a—l— —=— —r—e—f—(—f—a—l—s—e—)—;——
+——
+—c—o—n—s—t— —f—o—r—m— —=— —u—s—e—F—o—r—m—(—{——
+— — — — —n—a—m—e—:— —'—'—,——
+— — — — —e—m—a—i—l—:— —'—'—,——
+— — — — —p—a—s—s—w—o—r—d—:— —'—'—,——
+— — — — —r—o—l—e—:— —'—c—l—i—e—n—t—'—,——
+— — — — —c—o—m—p—a—n—y—_—n—a—m—e—:— —'—'—,——
+—}—)—;——
+——
+—c—o—n—s—t— —e—d—i—t—F—o—r—m— —=— —u—s—e—F—o—r—m—(—{——
+— — — — —i—d—:— —n—u—l—l—,——
+— — — — —n—a—m—e—:— —'—'—,——
+— — — — —e—m—a—i—l—:— —'—'—,——
+— — — — —p—a—s—s—w—o—r—d—:— —'—'—,——
+— — — — —r—o—l—e—:— —'—'—,——
+— — — — —c—o—m—p—a—n—y—_—n—a—m—e—:— —'—'—,——
+— — — — —c—r—e—d—i—t—_—s—t—a—t—u—s—:— —'—'—,——
+—}—)—;——
+——
+—c—o—n—s—t— —o—p—e—n—C—r—e—a—t—e—M—o—d—a—l— —=— —(—)— —=—>— —{——
+— — — — —f—o—r—m—.—r—e—s—e—t—(—)—;——
+— — — — —f—o—r—m—.—c—l—e—a—r—E—r—r—o—r—s—(—)—;——
+— — — — —s—h—o—w—C—r—e—a—t—e—M—o—d—a—l—.—v—a—l—u—e— —=— —t—r—u—e—;——
+—}—;——
+——
+—c—o—n—s—t— —o—p—e—n—E—d—i—t—M—o—d—a—l— —=— —(—u—s—e—r—)— —=—>— —{——
+— — — — —e—d—i—t—F—o—r—m—.—r—e—s—e—t—(—)—;——
+— — — — —e—d—i—t—F—o—r—m—.—c—l—e—a—r—E—r—r—o—r—s—(—)—;——
+— — — — —e—d—i—t—F—o—r—m—.—i—d— —=— —u—s—e—r—.—i—d—;——
+— — — — —e—d—i—t—F—o—r—m—.—n—a—m—e— —=— —u—s—e—r—.—n—a—m—e—;——
+— — — — —e—d—i—t—F—o—r—m—.—e—m—a—i—l— —=— —u—s—e—r—.—e—m—a—i—l—;——
+— — — — —e—d—i—t—F—o—r—m—.—r—o—l—e— —=— —u—s—e—r—.—r—o—l—e—;——
+— — — — —e—d—i—t—F—o—r—m—.—c—o—m—p—a—n—y—_—n—a—m—e— —=— —u—s—e—r—.—c—o—m—p—a—n—y—_—n—a—m—e— —|—|— —'—'—;——
+— — — — —e—d—i—t—F—o—r—m—.—c—r—e—d—i—t—_—s—t—a—t—u—s— —=— —u—s—e—r—.—c—r—e—d—i—t—_—s—t—a—t—u—s— —|—|— —'—p—e—n—d—i—n—g—'—;——
+— — — — —s—h—o—w—E—d—i—t—M—o—d—a—l—.—v—a—l—u—e— —=— —t—r—u—e—;——
+—}—;——
+——
+—c—o—n—s—t— —s—u—b—m—i—t—C—r—e—a—t—e— —=— —(—)— —=—>— —{——
+— — — — —f—o—r—m—.—p—o—s—t—(—r—o—u—t—e—(—'—a—d—m—i—n—.—u—s—e—r—s—.—s—t—o—r—e—'—)—,— —{——
+— — — — — — — — —o—n—S—u—c—c—e—s—s—:— —(—)— —=—>— —s—h—o—w—C—r—e—a—t—e—M—o—d—a—l—.—v—a—l—u—e— —=— —f—a—l—s—e—,——
+— — — — —}—)—;——
+—}—;——
+——
+—c—o—n—s—t— —s—u—b—m—i—t—E—d—i—t— —=— —(—)— —=—>— —{——
+— — — — —e—d—i—t—F—o—r—m—.—p—u—t—(—r—o—u—t—e—(—'—a—d—m—i—n—.—u—s—e—r—s—.—u—p—d—a—t—e—'—,— —e—d—i—t—F—o—r—m—.—i—d—)—,— —{——
+— — — — — — — — —o—n—S—u—c—c—e—s—s—:— —(—)— —=—>— —s—h—o—w—E—d—i—t—M—o—d—a—l—.—v—a—l—u—e— —=— —f—a—l—s—e—,——
+— — — — —}—)—;——
+—}—;——
+——
+—c—o—n—s—t— —d—e—l—e—t—e—U—s—e—r— —=— —(—i—d—)— —=—>— —{——
+— — — — —i—f— —(—c—o—n—f—i—r—m—(—'—A—r—e— —y—o—u— —s—u—r—e— —y—o—u— —w—a—n—t— —t—o— —d—e—l—e—t—e— —t—h—i—s— —u—s—e—r—?—'—)—)— —{——
+— — — — — — — — —r—o—u—t—e—r—.—d—e—l—e—t—e—(—r—o—u—t—e—(—'—a—d—m—i—n—.—u—s—e—r—s—.—d—e—s—t—r—o—y—'—,— —i—d—)—,— —{——
+— — — — — — — — — — — — —p—r—e—s—e—r—v—e—S—t—a—t—e—:— —t—r—u—e—,——
+— — — — — — — — — — — — —p—r—e—s—e—r—v—e—S—c—r—o—l—l—:— —t—r—u—e——
+— — — — — — — — —}—)—;——
+— — — — —}——
+—}—;——
+——
+—c—o—n—s—t— —r—o—l—e—s— —=— —[——
+— — — — —{— —v—a—l—u—e—:— —'—c—l—i—e—n—t—'—,— —l—a—b—e—l—:— —'—C—l—i—e—n—t— —(—B—2—B— —B—u—y—e—r—)—'—,— —c—o—l—o—r—:— —'—b—g—-—g—r—a—y—-—1—0—0— —t—e—x—t—-—g—r—a—y—-—8—0—0—'— —}—,——
+— — — — —{— —v—a—l—u—e—:— —'—s—a—l—e—s—'—,— —l—a—b—e—l—:— —'—S—a—l—e—s— —S—t—a—f—f—'—,— —c—o—l—o—r—:— —'—b—g—-—p—u—r—p—l—e—-—1—0—0— —t—e—x—t—-—p—u—r—p—l—e—-—8—0—0—'— —}—,——
+— — — — —{— —v—a—l—u—e—:— —'—p—u—r—c—h—a—s—i—n—g—'—,— —l—a—b—e—l—:— —'—P—u—r—c—h—a—s—i—n—g— —S—t—a—f—f—'—,— —c—o—l—o—r—:— —'—b—g—-—b—l—u—e—-—1—0—0— —t—e—x—t—-—b—l—u—e—-—8—0—0—'— —}—,——
+— — — — —{— —v—a—l—u—e—:— —'—w—a—r—e—h—o—u—s—e—'—,— —l—a—b—e—l—:— —'—W—a—r—e—h—o—u—s—e— —S—t—a—f—f—'—,— —c—o—l—o—r—:— —'—b—g—-—a—m—b—e—r—-—1—0—0— —t—e—x—t—-—a—m—b—e—r—-—8—0—0—'— —}—,——
+— — — — —{— —v—a—l—u—e—:— —'—f—i—n—a—n—c—e—'—,— —l—a—b—e—l—:— —'—F—i—n—a—n—c—e— —S—t—a—f—f—'—,— —c—o—l—o—r—:— —'—b—g—-—g—r—e—e—n—-—1—0—0— —t—e—x—t—-—g—r—e—e—n—-—8—0—0—'— —}—,——
+— — — — —{— —v—a—l—u—e—:— —'—a—d—m—i—n—'—,— —l—a—b—e—l—:— —'—A—d—m—i—n—'—,— —c—o—l—o—r—:— —'—b—g—-—r—e—d—-—1—0—0— —t—e—x—t—-—r—e—d—-—8—0—0—'— —}—,——
+— — — — —{— —v—a—l—u—e—:— —'—s—u—p—e—r—_—a—d—m—i—n—'—,— —l—a—b—e—l—:— —'—S—u—p—e—r— —A—d—m—i—n—'—,— —c—o—l—o—r—:— —'—b—g—-—r—e—d—-—2—0—0— —t—e—x—t—-—r—e—d—-—9—0—0— —f—o—n—t—-—b—o—l—d—'— —}—,——
+—]—;——
+——
+—c—o—n—s—t— —g—e—t—R—o—l—e—B—a—d—g—e— —=— —(—r—o—l—e—)— —=—>— —{——
+— — — — —c—o—n—s—t— —f—o—u—n—d— —=— —r—o—l—e—s—.—f—i—n—d—(—r— —=—>— —r—.—v—a—l—u—e— —=—=—=— —r—o—l—e—)—;——
+— — — — —r—e—t—u—r—n— —f—o—u—n—d— —?— —f—o—u—n—d—.—c—o—l—o—r— —:— —'—b—g—-—g—r—a—y—-—1—0—0— —t—e—x—t—-—g—r—a—y—-—8—0—0—'—;——
+—}—;——
+—c—o—n—s—t— —g—e—t—R—o—l—e—L—a—b—e—l— —=— —(—r—o—l—e—)— —=—>— —{——
+— — — — —c—o—n—s—t— —f—o—u—n—d— —=— —r—o—l—e—s—.—f—i—n—d—(—r— —=—>— —r—.—v—a—l—u—e— —=—=—=— —r—o—l—e—)—;——
+— — — — —r—e—t—u—r—n— —f—o—u—n—d— —?— —f—o—u—n—d—.—l—a—b—e—l— —:— —r—o—l—e—;——
+—}—;——
+—<—/—s—c—r—i—p—t—>——
+——
+—<—t—e—m—p—l—a—t—e—>——
+— — — — —<—A—d—m—i—n—L—a—y—o—u—t—>——
+— — — — — — — — —<—H—e—a—d— —t—i—t—l—e—=—"—U—s—e—r— —M—a—n—a—g—e—m—e—n—t— —|— —A—d—m—i—n—"— —/—>——
+— — — — — — — — —<—t—e—m—p—l—a—t—e— —#—h—e—a—d—e—r—>—U—s—e—r— —M—a—n—a—g—e—m—e—n—t—<—/—t—e—m—p—l—a—t—e—>——
+——
+— — — — — — — — —<—!—-—-— —T—a—b—s— —-—-—>——
+— — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—m—b—-—6— —b—o—r—d—e—r—-—b— —b—o—r—d—e—r—-—g—r—a—y—-—2—0—0—"—>——
+— — — — — — — — — — — — —<—n—a—v— —c—l—a—s—s—=—"—-—m—b—-—p—x— —f—l—e—x— —s—p—a—c—e—-—x—-—8—"—>——
+— — — — — — — — — — — — — — — — —<—b—u—t—t—o—n— —@—c—l—i—c—k—=—"—s—e—t—T—y—p—e—(—'—c—l—i—e—n—t—'—)—"— —:—c—l—a—s—s—=—"—[—t—y—p—e—F—i—l—t—e—r— —=—=—=— —'—c—l—i—e—n—t—'— —?— —'—b—o—r—d—e—r—-—j—u—b—i—s—-—n—a—v—y— —t—e—x—t—-—j—u—b—i—s—-—n—a—v—y—'— —:— —'—b—o—r—d—e—r—-—t—r—a—n—s—p—a—r—e—n—t— —t—e—x—t—-—g—r—a—y—-—5—0—0— —h—o—v—e—r—:—t—e—x—t—-—g—r—a—y—-—7—0—0— —h—o—v—e—r—:—b—o—r—d—e—r—-—g—r—a—y—-—3—0—0—'—,— —'—w—h—i—t—e—s—p—a—c—e—-—n—o—w—r—a—p— —p—b—-—4— —p—x—-—1— —b—o—r—d—e—r—-—b—-—2— —f—o—n—t—-—m—e—d—i—u—m— —t—e—x—t—-—s—m— —t—r—a—n—s—i—t—i—o—n—-—c—o—l—o—r—s—'—]—"—>——
+— — — — — — — — — — — — — — — — — — — — —B—2—B— —C—l—i—e—n—t—s——
+— — — — — — — — — — — — — — — — —<—/—b—u—t—t—o—n—>——
+— — — — — — — — — — — — — — — — —<—b—u—t—t—o—n— —@—c—l—i—c—k—=—"—s—e—t—T—y—p—e—(—'—s—t—a—f—f—'—)—"— —:—c—l—a—s—s—=—"—[—t—y—p—e—F—i—l—t—e—r— —=—=—=— —'—s—t—a—f—f—'— —?— —'—b—o—r—d—e—r—-—j—u—b—i—s—-—n—a—v—y— —t—e—x—t—-—j—u—b—i—s—-—n—a—v—y—'— —:— —'—b—o—r—d—e—r—-—t—r—a—n—s—p—a—r—e—n—t— —t—e—x—t—-—g—r—a—y—-—5—0—0— —h—o—v—e—r—:—t—e—x—t—-—g—r—a—y—-—7—0—0— —h—o—v—e—r—:—b—o—r—d—e—r—-—g—r—a—y—-—3—0—0—'—,— —'—w—h—i—t—e—s—p—a—c—e—-—n—o—w—r—a—p— —p—b—-—4— —p—x—-—1— —b—o—r—d—e—r—-—b—-—2— —f—o—n—t—-—m—e—d—i—u—m— —t—e—x—t—-—s—m— —t—r—a—n—s—i—t—i—o—n—-—c—o—l—o—r—s—'—]—"—>——
+— — — — — — — — — — — — — — — — — — — — —I—n—t—e—r—n—a—l— —S—t—a—f—f— —&— —A—d—m—i—n—s——
+— — — — — — — — — — — — — — — — —<—/—b—u—t—t—o—n—>——
+— — — — — — — — — — — — —<—/—n—a—v—>——
+— — — — — — — — —<—/—d—i—v—>——
+——
+— — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—m—b—-—6— —f—l—e—x— —f—l—e—x—-—c—o—l— —m—d—:—f—l—e—x—-—r—o—w— —g—a—p—-—4— —i—t—e—m—s—-—c—e—n—t—e—r— —j—u—s—t—i—f—y—-—b—e—t—w—e—e—n—"—>——
+— — — — — — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—f—l—e—x— —f—l—e—x—-—1— —g—a—p—-—4— —w—-—f—u—l—l— —m—d—:—w—-—a—u—t—o—"—>——
+— — — — — — — — — — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—r—e—l—a—t—i—v—e— —f—l—e—x—-—1— —m—a—x—-—w—-—m—d—"—>——
+— — — — — — — — — — — — — — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—a—b—s—o—l—u—t—e— —i—n—s—e—t—-—y—-—0— —l—e—f—t—-—0— —p—l—-—3— —f—l—e—x— —i—t—e—m—s—-—c—e—n—t—e—r— —p—o—i—n—t—e—r—-—e—v—e—n—t—s—-—n—o—n—e—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—M—a—g—n—i—f—y—i—n—g—G—l—a—s—s—I—c—o—n— —c—l—a—s—s—=—"—h—-—5— —w—-—5— —t—e—x—t—-—g—r—a—y—-—4—0—0—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — —<—i—n—p—u—t— —v—-—m—o—d—e—l—=—"—s—e—a—r—c—h—"— —@—i—n—p—u—t—=—"—u—p—d—a—t—e—S—e—a—r—c—h—"— —t—y—p—e—=—"—t—e—x—t—"— —p—l—a—c—e—h—o—l—d—e—r—=—"—S—e—a—r—c—h— —u—s—e—r—s—,— —e—m—a—i—l—s—,— —c—o—m—p—a—n—i—e—s—.—.—.—"— —c—l—a—s—s—=—"—b—l—o—c—k— —w—-—f—u—l—l— —p—l—-—1—0— —p—r—-—3— —p—y—-—2— —b—o—r—d—e—r— —b—o—r—d—e—r—-—g—r—a—y—-—3—0—0— —r—o—u—n—d—e—d—-—m—d— —l—e—a—d—i—n—g—-—5— —b—g—-—w—h—i—t—e— —p—l—a—c—e—h—o—l—d—e—r—-—g—r—a—y—-—5—0—0— —f—o—c—u—s—:—o—u—t—l—i—n—e—-—n—o—n—e— —f—o—c—u—s—:—r—i—n—g—-—j—u—b—i—s—-—n—a—v—y— —f—o—c—u—s—:—b—o—r—d—e—r—-—j—u—b—i—s—-—n—a—v—y— —s—m—:—t—e—x—t—-—s—m—"— —/—>——
+— — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — — — — — — — — — —<—s—e—l—e—c—t— —v—-—i—f—=—"—t—y—p—e—F—i—l—t—e—r— —=—=—=— —'—s—t—a—f—f—'—"— —v—-—m—o—d—e—l—=—"—r—o—l—e—F—i—l—t—e—r—"— —@—c—h—a—n—g—e—=—"—u—p—d—a—t—e—S—e—a—r—c—h—"— —c—l—a—s—s—=—"—b—l—o—c—k— —p—l—-—3— —p—r—-—1—0— —p—y—-—2— —t—e—x—t—-—b—a—s—e— —b—o—r—d—e—r—-—g—r—a—y—-—3—0—0— —f—o—c—u—s—:—o—u—t—l—i—n—e—-—n—o—n—e— —f—o—c—u—s—:—r—i—n—g—-—j—u—b—i—s—-—n—a—v—y— —f—o—c—u—s—:—b—o—r—d—e—r—-—j—u—b—i—s—-—n—a—v—y— —s—m—:—t—e—x—t—-—s—m— —r—o—u—n—d—e—d—-—m—d—"—>——
+— — — — — — — — — — — — — — — — — — — — —<—o—p—t—i—o—n— —v—a—l—u—e—=—"—a—l—l—"—>—A—l—l— —R—o—l—e—s—<—/—o—p—t—i—o—n—>——
+— — — — — — — — — — — — — — — — — — — — —<—o—p—t—i—o—n— —v—-—f—o—r—=—"—r— —i—n— —r—o—l—e—s—.—f—i—l—t—e—r—(—x— —=—>— —x—.—v—a—l—u—e— —!—=—=— —'—c—l—i—e—n—t—'—)—"— —:—k—e—y—=—"—r—.—v—a—l—u—e—"— —:—v—a—l—u—e—=—"—r—.—v—a—l—u—e—"—>—{—{— —r—.—l—a—b—e—l— —}—}—<—/—o—p—t—i—o—n—>——
+— — — — — — — — — — — — — — — — —<—/—s—e—l—e—c—t—>——
+— — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — — — — — ——
+— — — — — — — — — — — — —<—b—u—t—t—o—n— —@—c—l—i—c—k—=—"—o—p—e—n—C—r—e—a—t—e—M—o—d—a—l—"— —c—l—a—s—s—=—"—i—n—l—i—n—e—-—f—l—e—x— —i—t—e—m—s—-—c—e—n—t—e—r— —p—x—-—4— —p—y—-—2— —b—g—-—j—u—b—i—s—-—n—a—v—y— —b—o—r—d—e—r— —b—o—r—d—e—r—-—t—r—a—n—s—p—a—r—e—n—t— —r—o—u—n—d—e—d—-—m—d— —f—o—n—t—-—s—e—m—i—b—o—l—d— —t—e—x—t—-—x—s— —t—e—x—t—-—w—h—i—t—e— —u—p—p—e—r—c—a—s—e— —t—r—a—c—k—i—n—g—-—w—i—d—e—s—t— —h—o—v—e—r—:—b—g—-—[—#—0—7—1—1—2—6—]— —f—o—c—u—s—:—b—g—-—[—#—0—7—1—1—2—6—]— —a—c—t—i—v—e—:—b—g—-—[—#—0—7—1—1—2—6—]— —f—o—c—u—s—:—o—u—t—l—i—n—e—-—n—o—n—e— —f—o—c—u—s—:—r—i—n—g—-—2— —f—o—c—u—s—:—r—i—n—g—-—j—u—b—i—s—-—n—a—v—y— —f—o—c—u—s—:—r—i—n—g—-—o—f—f—s—e—t—-—2— —t—r—a—n—s—i—t—i—o—n— —e—a—s—e—-—i—n—-—o—u—t— —d—u—r—a—t—i—o—n—-—1—5—0—"—>——
+— — — — — — — — — — — — — — — — —<—U—s—e—r—I—c—o—n— —c—l—a—s—s—=—"—w—-—4— —h—-—4— —m—r—-—2—"— —/—>——
+— — — — — — — — — — — — — — — — —A—d—d— —{—{— —t—y—p—e—F—i—l—t—e—r— —=—=—=— —'—s—t—a—f—f—'— —?— —'—S—t—a—f—f—'— —:— —'—C—l—i—e—n—t—'— —}—}——
+— — — — — — — — — — — — —<—/—b—u—t—t—o—n—>——
+— — — — — — — — —<—/—d—i—v—>——
+——
+— — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—b—g—-—w—h—i—t—e— —r—o—u—n—d—e—d—-—x—l— —s—h—a—d—o—w—-—s—m— —b—o—r—d—e—r— —b—o—r—d—e—r—-—g—r—a—y—-—1—0—0— —o—v—e—r—f—l—o—w—-—h—i—d—d—e—n—"—>——
+— — — — — — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—o—v—e—r—f—l—o—w—-—x—-—a—u—t—o—"—>——
+— — — — — — — — — — — — — — — — —<—t—a—b—l—e— —c—l—a—s—s—=—"—m—i—n—-—w—-—f—u—l—l— —d—i—v—i—d—e—-—y— —d—i—v—i—d—e—-—g—r—a—y—-—2—0—0—"—>——
+— — — — — — — — — — — — — — — — — — — — —<—t—h—e—a—d— —c—l—a—s—s—=—"—b—g—-—g—r—a—y—-—5—0—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—t—r—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—t—h— —c—l—a—s—s—=—"—p—x—-—6— —p—y—-—3— —t—e—x—t—-—l—e—f—t— —t—e—x—t—-—x—s— —f—o—n—t—-—b—o—l—d— —t—e—x—t—-—g—r—a—y—-—5—0—0— —u—p—p—e—r—c—a—s—e— —t—r—a—c—k—i—n—g—-—w—i—d—e—r—"—>—N—a—m—e— —/— —C—o—m—p—a—n—y—<—/—t—h—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—t—h— —c—l—a—s—s—=—"—p—x—-—6— —p—y—-—3— —t—e—x—t—-—l—e—f—t— —t—e—x—t—-—x—s— —f—o—n—t—-—b—o—l—d— —t—e—x—t—-—g—r—a—y—-—5—0—0— —u—p—p—e—r—c—a—s—e— —t—r—a—c—k—i—n—g—-—w—i—d—e—r—"—>—E—m—a—i—l—<—/—t—h—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—t—h— —c—l—a—s—s—=—"—p—x—-—6— —p—y—-—3— —t—e—x—t—-—l—e—f—t— —t—e—x—t—-—x—s— —f—o—n—t—-—b—o—l—d— —t—e—x—t—-—g—r—a—y—-—5—0—0— —u—p—p—e—r—c—a—s—e— —t—r—a—c—k—i—n—g—-—w—i—d—e—r—"—>—S—y—s—t—e—m— —R—o—l—e—<—/—t—h—>—
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—t—h— —c—l—a—s—s—=—"—p—x—-—6— —p—y—-—3— —t—e—x—t—-—l—e—f—t— —t—e—x—t—-—x—s— —f—o—n—t—-—b—o—l—d— —t—e—x—t—-—g—r—a—y—-—5—0—0— —u—p—p—e—r—c—a—s—e— —t—r—a—c—k—i—n—g—-—w—i—d—e—r—"—>—A—c—c—o—u—n—t— —S—t—a—t—u—s—<—/—t—h—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—t—h— —c—l—a—s—s—=—"—p—x—-—6— —p—y—-—3— —t—e—x—t—-—l—e—f—t— —t—e—x—t—-—x—s— —f—o—n—t—-—b—o—l—d— —t—e—x—t—-—g—r—a—y—-—5—0—0— —u—p—p—e—r—c—a—s—e— —t—r—a—c—k—i—n—g—-—w—i—d—e—r—"—>—J—o—i—n—e—d—<—/—t—h—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—t—h— —c—l—a—s—s—=—"—p—x—-—6— —p—y—-—3— —t—e—x—t—-—r—i—g—h—t— —t—e—x—t—-—x—s— —f—o—n—t—-—b—o—l—d— —t—e—x—t—-—g—r—a—y—-—5—0—0— —u—p—p—e—r—c—a—s—e— —t—r—a—c—k—i—n—g—-—w—i—d—e—r—"—>—A—c—t—i—o—n—s—<—/—t—h—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—t—r—>——
+— — — — — — — — — — — — — — — — — — — — —<—/—t—h—e—a—d—>——
+— — — — — — — — — — — — — — — — — — — — —<—t—b—o—d—y— —c—l—a—s—s—=—"—b—g—-—w—h—i—t—e— —d—i—v—i—d—e—-—y— —d—i—v—i—d—e—-—g—r—a—y—-—2—0—0—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—t—r— —v—-—f—o—r—=—"—u—s—e—r— —i—n— —u—s—e—r—s—.—d—a—t—a—"— —:—k—e—y—=—"—u—s—e—r—.—i—d—"— —c—l—a—s—s—=—"—h—o—v—e—r—:—b—g—-—g—r—a—y—-—5—0—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—t—d— —c—l—a—s—s—=—"—p—x—-—6— —p—y—-—4—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—f—o—n—t—-—b—o—l—d— —t—e—x—t—-—g—r—a—y—-—9—0—0—"—>—{—{— —u—s—e—r—.—n—a—m—e— —}—}—<—/—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—t—e—x—t—-—s—m— —t—e—x—t—-—g—r—a—y—-—5—0—0—"—>—{—{— —u—s—e—r—.—c—o—m—p—a—n—y—_—n—a—m—e— —|—|— —'———'— —}—}—<—/—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—/—t—d—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—t—d— —c—l—a—s—s—=—"—p—x—-—6— —p—y—-—4— —t—e—x—t—-—s—m— —t—e—x—t—-—g—r—a—y—-—6—0—0—"—>—{—{— —u—s—e—r—.—e—m—a—i—l— —}—}—<—/—t—d—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — ——
+—<—t—d— —c—l—a—s—s—=—"—p—x—-—6— —p—y—-—4—"—>——
+— — — — —<—s—p—a—n— —:—c—l—a—s—s—=—"—[—g—e—t—R—o—l—e—B—a—d—g—e—(—u—s—e—r—.—r—o—l—e—)—,— —'—p—x—-—2—.—5— —p—y—-—0—.—5— —r—o—u—n—d—e—d—-—f—u—l—l— —t—e—x—t—-—x—s— —f—o—n—t—-—m—e—d—i—u—m— —u—p—p—e—r—c—a—s—e—'—]—"—>——
+— — — — — — — — —{—{— —g—e—t—R—o—l—e—L—a—b—e—l—(—u—s—e—r—.—r—o—l—e—)— —}—}——
+— — — — —<—/—s—p—a—n—>——
+—<—/—t—d—>——
+—<—t—d— —c—l—a—s—s—=—"—p—x—-—6— —p—y—-—4—"—>——
+— — — — —<—s—p—a—n— —v—-—i—f—=—"—u—s—e—r—.—r—o—l—e— —=—=—=— —'—c—l—i—e—n—t—'—"— —:—c—l—a—s—s—=—"—[—u—s—e—r—.—c—r—e—d—i—t—_—s—t—a—t—u—s— —=—=—=— —'—a—p—p—r—o—v—e—d—'— —?— —'—b—g—-—g—r—e—e—n—-—1—0—0— —t—e—x—t—-—g—r—e—e—n—-—8—0—0—'— —:— —(—u—s—e—r—.—c—r—e—d—i—t—_—s—t—a—t—u—s— —=—=—=— —'—s—u—s—p—e—n—d—e—d—'— —?— —'—b—g—-—r—e—d—-—1—0—0— —t—e—x—t—-—r—e—d—-—8—0—0—'— —:— —'—b—g—-—y—e—l—l—o—w—-—1—0—0— —t—e—x—t—-—y—e—l—l—o—w—-—8—0—0—'—)—,— —'—p—x—-—2—.—5— —p—y—-—0—.—5— —r—o—u—n—d—e—d—-—f—u—l—l— —t—e—x—t—-—x—s— —f—o—n—t—-—m—e—d—i—u—m— —u—p—p—e—r—c—a—s—e—'—]—"—>——
+— — — — — — — — —{—{— —u—s—e—r—.—c—r—e—d—i—t—_—s—t—a—t—u—s— —}—}——
+— — — — —<—/—s—p—a—n—>——
+— — — — —<—s—p—a—n— —v—-—e—l—s—e— —c—l—a—s—s—=—"—t—e—x—t—-—g—r—a—y—-—4—0—0— —t—e—x—t—-—x—s—"—>—�—<—/—s—p—a—n—>——
+—<—/—t—d—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—t—d— —c—l—a—s—s—=—"—p—x—-—6— —p—y—-—4— —t—e—x—t—-—s—m— —t—e—x—t—-—g—r—a—y—-—5—0—0—"—>—{—{— —n—e—w— —D—a—t—e—(—u—s—e—r—.—c—r—e—a—t—e—d—_—a—t—)—.—t—o—L—o—c—a—l—e—D—a—t—e—S—t—r—i—n—g—(—)— —}—}—<—/—t—d—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—t—d— —c—l—a—s—s—=—"—p—x—-—6— —p—y—-—4— —t—e—x—t—-—r—i—g—h—t— —t—e—x—t—-—s—m— —f—o—n—t—-—m—e—d—i—u—m—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—b—u—t—t—o—n— —@—c—l—i—c—k—=—"—o—p—e—n—E—d—i—t—M—o—d—a—l—(—u—s—e—r—)—"— —c—l—a—s—s—=—"—t—e—x—t—-—b—l—u—e—-—6—0—0— —h—o—v—e—r—:—t—e—x—t—-—b—l—u—e—-—9—0—0— —m—r—-—4—"— —t—i—t—l—e—=—"—E—d—i—t— —U—s—e—r—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—P—e—n—c—i—l—S—q—u—a—r—e—I—c—o—n— —c—l—a—s—s—=—"—w—-—5— —h—-—5— —i—n—l—i—n—e—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—/—b—u—t—t—o—n—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—b—u—t—t—o—n— —v—-—i—f—=—"—$—p—a—g—e—.—p—r—o—p—s—.—a—u—t—h—.—u—s—e—r—.—i—d— —!—=—=— —u—s—e—r—.—i—d—"— —@—c—l—i—c—k—=—"—d—e—l—e—t—e—U—s—e—r—(—u—s—e—r—.—i—d—)—"— —c—l—a—s—s—=—"—t—e—x—t—-—r—e—d—-—6—0—0— —h—o—v—e—r—:—t—e—x—t—-—r—e—d—-—9—0—0—"— —t—i—t—l—e—=—"—D—e—l—e—t—e— —U—s—e—r—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—T—r—a—s—h—I—c—o—n— —c—l—a—s—s—=—"—w—-—5— —h—-—5— —i—n—l—i—n—e—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—/—b—u—t—t—o—n—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—/—t—d—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—t—r—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—t—r— —v—-—i—f—=—"—u—s—e—r—s—.—d—a—t—a—.—l—e—n—g—t—h— —=—=—=— —0—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—t—d— —c—o—l—s—p—a—n—=—"—5—"— —c—l—a—s—s—=—"—p—x—-—6— —p—y—-—1—2— —t—e—x—t—-—c—e—n—t—e—r— —t—e—x—t—-—g—r—a—y—-—5—0—0— —f—o—n—t—-—m—e—d—i—u—m—"—>—N—o— —u—s—e—r—s— —f—o—u—n—d— —m—a—t—c—h—i—n—g— —y—o—u—r— —s—e—a—r—c—h—.—<—/—t—d—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—t—r—>——
+— — — — — — — — — — — — — — — — — — — — —<—/—t—b—o—d—y—>——
+— — — — — — — — — — — — — — — — —<—/—t—a—b—l—e—>——
+— — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — — — — — ——
+— — — — — — — — — — — — —<—!—-—-— —P—a—g—i—n—a—t—i—o—n— —-—-—>——
+— — — — — — — — — — — — —<—d—i—v— —v—-—i—f—=—"—u—s—e—r—s—.—l—i—n—k—s—.—l—e—n—g—t—h— —>— —3—"— —c—l—a—s—s—=—"—b—g—-—w—h—i—t—e— —p—x—-—4— —p—y—-—3— —f—l—e—x— —i—t—e—m—s—-—c—e—n—t—e—r— —j—u—s—t—i—f—y—-—b—e—t—w—e—e—n— —b—o—r—d—e—r—-—t— —b—o—r—d—e—r—-—g—r—a—y—-—2—0—0— —s—m—:—p—x—-—6—"—>——
+— — — — — — — — — — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—f—l—e—x—-—1— —f—l—e—x— —j—u—s—t—i—f—y—-—c—e—n—t—e—r—"—>——
+— — — — — — — — — — — — — — — — — — — — —<—n—a—v— —c—l—a—s—s—=—"—r—e—l—a—t—i—v—e— —z—-—0— —i—n—l—i—n—e—-—f—l—e—x— —r—o—u—n—d—e—d—-—m—d— —s—h—a—d—o—w—-—s—m— —-—s—p—a—c—e—-—x—-—p—x—"— —a—r—i—a—-—l—a—b—e—l—=—"—P—a—g—i—n—a—t—i—o—n—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—L—i—n—k— —v—-—f—o—r—=—"—(—l—i—n—k—,— —k—)— —i—n— —u—s—e—r—s—.—l—i—n—k—s—"— —:—k—e—y—=—"—k—"——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —:—h—r—e—f—=—"—l—i—n—k—.—u—r—l— —|—|— —'—#—'—"——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —:—c—l—a—s—s—=—"—[——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —l—i—n—k—.—a—c—t—i—v—e— —?— —'—z—-—1—0— —b—g—-—b—l—u—e—-—5—0— —b—o—r—d—e—r—-—j—u—b—i—s—-—n—a—v—y— —t—e—x—t—-—j—u—b—i—s—-—n—a—v—y—'— —:— —'—b—g—-—w—h—i—t—e— —b—o—r—d—e—r—-—g—r—a—y—-—3—0—0— —t—e—x—t—-—g—r—a—y—-—5—0—0— —h—o—v—e—r—:—b—g—-—g—r—a—y—-—5—0—'—,——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —!—l—i—n—k—.—u—r—l— —?— —'—o—p—a—c—i—t—y—-—5—0— —c—u—r—s—o—r—-—n—o—t—-—a—l—l—o—w—e—d—'— —:— —'—'—,——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —'—r—e—l—a—t—i—v—e— —i—n—l—i—n—e—-—f—l—e—x— —i—t—e—m—s—-—c—e—n—t—e—r— —p—x—-—4— —p—y—-—2— —b—o—r—d—e—r— —t—e—x—t—-—s—m— —f—o—n—t—-—m—e—d—i—u—m—'——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —]—"——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —v—-—h—t—m—l—=—"—l—i—n—k—.—l—a—b—e—l—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — —<—/—n—a—v—>——
+— — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — —<—/—d—i—v—>——
+——
+— — — — — — — — —<—!—-—-— —C—r—e—a—t—e— —U—s—e—r— —M—o—d—a—l— —-—-—>——
+— — — — — — — — —<—M—o—d—a—l— —:—s—h—o—w—=—"—s—h—o—w—C—r—e—a—t—e—M—o—d—a—l—"— —@—c—l—o—s—e—=—"—s—h—o—w—C—r—e—a—t—e—M—o—d—a—l— —=— —f—a—l—s—e—"— —m—a—x—W—i—d—t—h—=—"—m—d—"—>——
+— — — — — — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—p—-—6—"—>——
+— — — — — — — — — — — — — — — — —<—h—2— —c—l—a—s—s—=—"—t—e—x—t—-—l—g— —f—o—n—t—-—b—o—l—d— —t—e—x—t—-—g—r—a—y—-—9—0—0— —m—b—-—6— —f—l—e—x— —i—t—e—m—s—-—c—e—n—t—e—r—"—>——
+— — — — — — — — — — — — — — — — — — — — —<—U—s—e—r—I—c—o—n— —c—l—a—s—s—=—"—w—-—5— —h—-—5— —m—r—-—2— —t—e—x—t—-—j—u—b—i—s—-—n—a—v—y—"— —/—>— —A—d—d— —N—e—w— —U—s—e—r——
+— — — — — — — — — — — — — — — — —<—/—h—2—>——
+— — — — — — — — — — — — — — — — ——
+— — — — — — — — — — — — — — — — —<—f—o—r—m— —@—s—u—b—m—i—t—.—p—r—e—v—e—n—t—=—"—s—u—b—m—i—t—C—r—e—a—t—e—"—>——
+— — — — — — — — — — — — — — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—s—p—a—c—e—-—y—-—4—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—L—a—b—e—l— —f—o—r—=—"—n—a—m—e—"— —v—a—l—u—e—=—"—F—u—l—l— —N—a—m—e—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—T—e—x—t—I—n—p—u—t— —i—d—=—"—n—a—m—e—"— —v—-—m—o—d—e—l—=—"—f—o—r—m—.—n—a—m—e—"— —t—y—p—e—=—"—t—e—x—t—"— —c—l—a—s—s—=—"—m—t—-—1— —b—l—o—c—k— —w—-—f—u—l—l—"— —r—e—q—u—i—r—e—d— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—E—r—r—o—r— —:—m—e—s—s—a—g—e—=—"—f—o—r—m—.—e—r—r—o—r—s—.—n—a—m—e—"— —c—l—a—s—s—=—"—m—t—-—2—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — ——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—L—a—b—e—l— —f—o—r—=—"—e—m—a—i—l—"— —v—a—l—u—e—=—"—E—m—a—i—l— —A—d—d—r—e—s—s—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—T—e—x—t—I—n—p—u—t— —i—d—=—"—e—m—a—i—l—"— —v—-—m—o—d—e—l—=—"—f—o—r—m—.—e—m—a—i—l—"— —t—y—p—e—=—"—e—m—a—i—l—"— —c—l—a—s—s—=—"—m—t—-—1— —b—l—o—c—k— —w—-—f—u—l—l—"— —r—e—q—u—i—r—e—d— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—E—r—r—o—r— —:—m—e—s—s—a—g—e—=—"—f—o—r—m—.—e—r—r—o—r—s—.—e—m—a—i—l—"— —c—l—a—s—s—=—"—m—t—-—2—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—L—a—b—e—l— —f—o—r—=—"—c—o—m—p—a—n—y—_—n—a—m—e—"— —v—a—l—u—e—=—"—C—o—m—p—a—n—y— —N—a—m—e— —(—O—p—t—i—o—n—a—l—)—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—T—e—x—t—I—n—p—u—t— —i—d—=—"—c—o—m—p—a—n—y—_—n—a—m—e—"— —v—-—m—o—d—e—l—=—"—f—o—r—m—.—c—o—m—p—a—n—y—_—n—a—m—e—"— —t—y—p—e—=—"—t—e—x—t—"— —c—l—a—s—s—=—"—m—t—-—1— —b—l—o—c—k— —w—-—f—u—l—l—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—E—r—r—o—r— —:—m—e—s—s—a—g—e—=—"—f—o—r—m—.—e—r—r—o—r—s—.—c—o—m—p—a—n—y—_—n—a—m—e—"— —c—l—a—s—s—=—"—m—t—-—2—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—L—a—b—e—l— —f—o—r—=—"—p—a—s—s—w—o—r—d—"— —v—a—l—u—e—=—"—P—a—s—s—w—o—r—d—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—T—e—x—t—I—n—p—u—t— —i—d—=—"—p—a—s—s—w—o—r—d—"— —v—-—m—o—d—e—l—=—"—f—o—r—m—.—p—a—s—s—w—o—r—d—"— —t—y—p—e—=—"—p—a—s—s—w—o—r—d—"— —c—l—a—s—s—=—"—m—t—-—1— —b—l—o—c—k— —w—-—f—u—l—l—"— —r—e—q—u—i—r—e—d— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—E—r—r—o—r— —:—m—e—s—s—a—g—e—=—"—f—o—r—m—.—e—r—r—o—r—s—.—p—a—s—s—w—o—r—d—"— —c—l—a—s—s—=—"—m—t—-—2—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—L—a—b—e—l— —f—o—r—=—"—r—o—l—e—"— —v—a—l—u—e—=—"—S—y—s—t—e—m— —R—o—l—e—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—s—e—l—e—c—t— —i—d—=—"—r—o—l—e—"— —v—-—m—o—d—e—l—=—"—f—o—r—m—.—r—o—l—e—"— —c—l—a—s—s—=—"—m—t—-—1— —b—l—o—c—k— —w—-—f—u—l—l— —b—o—r—d—e—r—-—g—r—a—y—-—3—0—0— —f—o—c—u—s—:—b—o—r—d—e—r—-—j—u—b—i—s—-—n—a—v—y— —f—o—c—u—s—:—r—i—n—g—-—j—u—b—i—s—-—n—a—v—y— —r—o—u—n—d—e—d—-—m—d— —s—h—a—d—o—w—-—s—m—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—o—p—t—i—o—n— —v—-—f—o—r—=—"—r— —i—n— —r—o—l—e—s—"— —:—k—e—y—=—"—r—.—v—a—l—u—e—"— —:—v—a—l—u—e—=—"—r—.—v—a—l—u—e—"—>—{—{— —r—.—l—a—b—e—l— —}—}—<—/—o—p—t—i—o—n—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—/—s—e—l—e—c—t—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—p— —c—l—a—s—s—=—"—m—t—-—1— —t—e—x—t—-—x—s— —t—e—x—t—-—g—r—a—y—-—5—0—0—"—>—D—e—t—e—r—m—i—n—e—s— —w—h—i—c—h— —s—e—c—t—i—o—n—s— —o—f— —t—h—e— —A—d—m—i—n— —P—a—n—e—l— —t—h—i—s— —u—s—e—r— —c—a—n— —a—c—c—e—s—s—.—<—/—p—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—E—r—r—o—r— —:—m—e—s—s—a—g—e—=—"—f—o—r—m—.—e—r—r—o—r—s—.—r—o—l—e—"— —c—l—a—s—s—=—"—m—t—-—2—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+——
+— — — — — — — — — — — — — — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—m—t—-—6— —f—l—e—x— —j—u—s—t—i—f—y—-—e—n—d— —s—p—a—c—e—-—x—-—3—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—S—e—c—o—n—d—a—r—y—B—u—t—t—o—n— —@—c—l—i—c—k—=—"—s—h—o—w—C—r—e—a—t—e—M—o—d—a—l— —=— —f—a—l—s—e—"—>—C—a—n—c—e—l—<—/—S—e—c—o—n—d—a—r—y—B—u—t—t—o—n—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—P—r—i—m—a—r—y—B—u—t—t—o—n— —:—c—l—a—s—s—=—"—{— —'—o—p—a—c—i—t—y—-—2—5—'—:— —f—o—r—m—.—p—r—o—c—e—s—s—i—n—g— —}—"— —:—d—i—s—a—b—l—e—d—=—"—f—o—r—m—.—p—r—o—c—e—s—s—i—n—g—"—>—C—r—e—a—t—e— —U—s—e—r—<—/—P—r—i—m—a—r—y—B—u—t—t—o—n—>——
+— — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — — — — — — — — — —<—/—f—o—r—m—>——
+— — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — —<—/—M—o—d—a—l—>——
+——
+— — — — — — — — —<—!—-—-— —E—d—i—t— —U—s—e—r— —M—o—d—a—l— —-—-—>——
+— — — — — — — — —<—M—o—d—a—l— —:—s—h—o—w—=—"—s—h—o—w—E—d—i—t—M—o—d—a—l—"— —@—c—l—o—s—e—=—"—s—h—o—w—E—d—i—t—M—o—d—a—l— —=— —f—a—l—s—e—"— —m—a—x—W—i—d—t—h—=—"—m—d—"—>——
+— — — — — — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—p—-—6—"—>——
+— — — — — — — — — — — — — — — — —<—h—2— —c—l—a—s—s—=—"—t—e—x—t—-—l—g— —f—o—n—t—-—b—o—l—d— —t—e—x—t—-—g—r—a—y—-—9—0—0— —m—b—-—6— —f—l—e—x— —i—t—e—m—s—-—c—e—n—t—e—r—"—>——
+— — — — — — — — — — — — — — — — — — — — —<—P—e—n—c—i—l—S—q—u—a—r—e—I—c—o—n— —c—l—a—s—s—=—"—w—-—5— —h—-—5— —m—r—-—2— —t—e—x—t—-—j—u—b—i—s—-—n—a—v—y—"— —/—>— —E—d—i—t— —U—s—e—r——
+— — — — — — — — — — — — — — — — —<—/—h—2—>——
+— — — — — — — — — — — — — — — — ——
+— — — — — — — — — — — — — — — — —<—f—o—r—m— —@—s—u—b—m—i—t—.—p—r—e—v—e—n—t—=—"—s—u—b—m—i—t—E—d—i—t—"—>——
+— — — — — — — — — — — — — — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—s—p—a—c—e—-—y—-—4—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—L—a—b—e—l— —f—o—r—=—"—e—d—i—t—_—n—a—m—e—"— —v—a—l—u—e—=—"—F—u—l—l— —N—a—m—e—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—T—e—x—t—I—n—p—u—t— —i—d—=—"—e—d—i—t—_—n—a—m—e—"— —v—-—m—o—d—e—l—=—"—e—d—i—t—F—o—r—m—.—n—a—m—e—"— —t—y—p—e—=—"—t—e—x—t—"— —c—l—a—s—s—=—"—m—t—-—1— —b—l—o—c—k— —w—-—f—u—l—l—"— —r—e—q—u—i—r—e—d— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—E—r—r—o—r— —:—m—e—s—s—a—g—e—=—"—e—d—i—t—F—o—r—m—.—e—r—r—o—r—s—.—n—a—m—e—"— —c—l—a—s—s—=—"—m—t—-—2—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — ——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—L—a—b—e—l— —f—o—r—=—"—e—d—i—t—_—e—m—a—i—l—"— —v—a—l—u—e—=—"—E—m—a—i—l— —A—d—d—r—e—s—s—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—T—e—x—t—I—n—p—u—t— —i—d—=—"—e—d—i—t—_—e—m—a—i—l—"— —v—-—m—o—d—e—l—=—"—e—d—i—t—F—o—r—m—.—e—m—a—i—l—"— —t—y—p—e—=—"—e—m—a—i—l—"— —c—l—a—s—s—=—"—m—t—-—1— —b—l—o—c—k— —w—-—f—u—l—l—"— —r—e—q—u—i—r—e—d— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—E—r—r—o—r— —:—m—e—s—s—a—g—e—=—"—e—d—i—t—F—o—r—m—.—e—r—r—o—r—s—.—e—m—a—i—l—"— —c—l—a—s—s—=—"—m—t—-—2—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—L—a—b—e—l— —f—o—r—=—"—e—d—i—t—_—c—o—m—p—a—n—y—_—n—a—m—e—"— —v—a—l—u—e—=—"—C—o—m—p—a—n—y— —N—a—m—e— —(—O—p—t—i—o—n—a—l—)—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—T—e—x—t—I—n—p—u—t— —i—d—=—"—e—d—i—t—_—c—o—m—p—a—n—y—_—n—a—m—e—"— —v—-—m—o—d—e—l—=—"—e—d—i—t—F—o—r—m—.—c—o—m—p—a—n—y—_—n—a—m—e—"— —t—y—p—e—=—"—t—e—x—t—"— —c—l—a—s—s—=—"—m—t—-—1— —b—l—o—c—k— —w—-—f—u—l—l—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—E—r—r—o—r— —:—m—e—s—s—a—g—e—=—"—e—d—i—t—F—o—r—m—.—e—r—r—o—r—s—.—c—o—m—p—a—n—y—_—n—a—m—e—"— —c—l—a—s—s—=—"—m—t—-—2—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—L—a—b—e—l— —f—o—r—=—"—e—d—i—t—_—r—o—l—e—"— —v—a—l—u—e—=—"—S—y—s—t—e—m— —R—o—l—e—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—s—e—l—e—c—t— —i—d—=—"—e—d—i—t—_—r—o—l—e—"— —v—-—m—o—d—e—l—=—"—e—d—i—t—F—o—r—m—.—r—o—l—e—"— —c—l—a—s—s—=—"—m—t—-—1— —b—l—o—c—k— —w—-—f—u—l—l— —b—o—r—d—e—r—-—g—r—a—y—-—3—0—0— —f—o—c—u—s—:—b—o—r—d—e—r—-—j—u—b—i—s—-—n—a—v—y— —f—o—c—u—s—:—r—i—n—g—-—j—u—b—i—s—-—n—a—v—y— —r—o—u—n—d—e—d—-—m—d— —s—h—a—d—o—w—-—s—m—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—o—p—t—i—o—n— —v—-—f—o—r—=—"—r— —i—n— —r—o—l—e—s—"— —:—k—e—y—=—"—r—.—v—a—l—u—e—"— —:—v—a—l—u—e—=—"—r—.—v—a—l—u—e—"—>—{—{— —r—.—l—a—b—e—l— —}—}—<—/—o—p—t—i—o—n—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—/—s—e—l—e—c—t—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—E—r—r—o—r— —:—m—e—s—s—a—g—e—=—"—e—d—i—t—F—o—r—m—.—e—r—r—o—r—s—.—r—o—l—e—"— —c—l—a—s—s—=—"—m—t—-—2—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—d—i—v— —v—-—i—f—=—"—e—d—i—t—F—o—r—m—.—r—o—l—e— —=—=—=— —'—c—l—i—e—n—t—'—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—L—a—b—e—l— —f—o—r—=—"—e—d—i—t—_—c—r—e—d—i—t—_—s—t—a—t—u—s—"— —v—a—l—u—e—=—"—A—c—c—o—u—n—t— —S—t—a—t—u—s— —(—B—2—B— —A—p—p—r—o—v—a—l—)—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—s—e—l—e—c—t— —i—d—=—"—e—d—i—t—_—c—r—e—d—i—t—_—s—t—a—t—u—s—"— —v—-—m—o—d—e—l—=—"—e—d—i—t—F—o—r—m—.—c—r—e—d—i—t—_—s—t—a—t—u—s—"— —c—l—a—s—s—=—"—m—t—-—1— —b—l—o—c—k— —w—-—f—u—l—l— —b—o—r—d—e—r—-—g—r—a—y—-—3—0—0— —f—o—c—u—s—:—b—o—r—d—e—r—-—j—u—b—i—s—-—n—a—v—y— —f—o—c—u—s—:—r—i—n—g—-—j—u—b—i—s—-—n—a—v—y— —r—o—u—n—d—e—d—-—m—d— —s—h—a—d—o—w—-—s—m—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—o—p—t—i—o—n— —v—a—l—u—e—=—"—p—e—n—d—i—n—g—"—>—P—e—n—d—i—n—g— —A—p—p—r—o—v—a—l—<—/—o—p—t—i—o—n—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—o—p—t—i—o—n— —v—a—l—u—e—=—"—a—p—p—r—o—v—e—d—"—>—A—p—p—r—o—v—e—d—<—/—o—p—t—i—o—n—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—o—p—t—i—o—n— —v—a—l—u—e—=—"—s—u—s—p—e—n—d—e—d—"—>—S—u—s—p—e—n—d—e—d—<—/—o—p—t—i—o—n—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—/—s—e—l—e—c—t—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—E—r—r—o—r— —:—m—e—s—s—a—g—e—=—"—e—d—i—t—F—o—r—m—.—e—r—r—o—r—s—.—c—r—e—d—i—t—_—s—t—a—t—u—s—"— —c—l—a—s—s—=—"—m—t—-—2—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — ——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—h—r— —c—l—a—s—s—=—"—m—y—-—4—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — ——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—L—a—b—e—l— —f—o—r—=—"—e—d—i—t—_—p—a—s—s—w—o—r—d—"— —v—a—l—u—e—=—"—N—e—w— —P—a—s—s—w—o—r—d— —(—L—e—a—v—e— —b—l—a—n—k— —t—o— —k—e—e—p— —c—u—r—r—e—n—t—)—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—T—e—x—t—I—n—p—u—t— —i—d—=—"—e—d—i—t—_—p—a—s—s—w—o—r—d—"— —v—-—m—o—d—e—l—=—"—e—d—i—t—F—o—r—m—.—p—a—s—s—w—o—r—d—"— —t—y—p—e—=—"—p—a—s—s—w—o—r—d—"— —c—l—a—s—s—=—"—m—t—-—1— —b—l—o—c—k— —w—-—f—u—l—l—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — — — — — —<—I—n—p—u—t—E—r—r—o—r— —:—m—e—s—s—a—g—e—=—"—e—d—i—t—F—o—r—m—.—e—r—r—o—r—s—.—p—a—s—s—w—o—r—d—"— —c—l—a—s—s—=—"—m—t—-—2—"— —/—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+——
+— — — — — — — — — — — — — — — — — — — — —<—d—i—v— —c—l—a—s—s—=—"—m—t—-—6— —f—l—e—x— —j—u—s—t—i—f—y—-—e—n—d— —s—p—a—c—e—-—x—-—3—"—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—S—e—c—o—n—d—a—r—y—B—u—t—t—o—n— —@—c—l—i—c—k—=—"—s—h—o—w—E—d—i—t—M—o—d—a—l— —=— —f—a—l—s—e—"—>—C—a—n—c—e—l—<—/—S—e—c—o—n—d—a—r—y—B—u—t—t—o—n—>——
+— — — — — — — — — — — — — — — — — — — — — — — — —<—P—r—i—m—a—r—y—B—u—t—t—o—n— —:—c—l—a—s—s—=—"—{— —'—o—p—a—c—i—t—y—-—2—5—'—:— —e—d—i—t—F—o—r—m—.—p—r—o—c—e—s—s—i—n—g— —}—"— —:—d—i—s—a—b—l—e—d—=—"—e—d—i—t—F—o—r—m—.—p—r—o—c—e—s—s—i—n—g—"—>—S—a—v—e— —C—h—a—n—g—e—s—<—/—P—r—i—m—a—r—y—B—u—t—t—o—n—>——
+— — — — — — — — — — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — — — — — — — — — —<—/—f—o—r—m—>——
+— — — — — — — — — — — — —<—/—d—i—v—>——
+— — — — — — — — —<—/—M—o—d—a—l—>——
+— — — — —<—/—A—d—m—i—n—L—a—y—o—u—t—>——
+—<—/—t—e—m—p—l—a—t—e—>——
+——
+——
+—
