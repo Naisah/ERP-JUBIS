@@ -193,49 +193,7 @@ Route::post('/api/invoices/{id}/accept-terms', function ($id) {
 
 Route::get('/api/mock/tracking/{tracking}', function($tracking) { $shipment = \App\Models\Shipment::where('tracking_number', $tracking)->first(); return view('mock-tracking', ['tracking' => $tracking, 'shipments' => $shipment]); });
 
-Route::get('/create-ceo', function() {
-    $user = \App\Models\User::firstOrCreate(
-        ['email' => 'andreapanganiban05@gmail.com'],
-        [
-            'name' => 'Andrea Panganiban',
-            'password' => bcrypt('password123'),
-            'company_name' => 'Jubis Marketing',
-            'role' => 'admin',
-            'credit_status' => 'approved',
-            'phone' => '09123456789',
-            'shipping_address' => 'Jubis Office'
-        ]
-    );
-    $user->role = 'admin';
-    $user->save();
-    return 'CEO Admin account created successfully! Email: andreapanganiban05@gmail.com / Password: password123';
-});
-Route::get('/restore-staff', function() {
-    $staff = [
-        ['name' => 'Finance Department', 'email' => 'andreabermudez0511@gmail.com'],
-        ['name' => 'Purchasing Department', 'email' => 'karlammagalong6@gmail.com'],
-        ['name' => 'Sales Department', 'email' => 'georgeilagan62@gmail.com'],
-        ['name' => 'Jubis CEO', 'email' => 'andreapanganiban05@gmail.com'],
-        ['name' => 'Warehouse & Logistics', 'email' => 'dwyanetjhung@gmail.com']
-    ];
 
-    foreach ($staff as $person) {
-        \App\Models\User::updateOrCreate(
-            ['email' => $person['email']],
-            [
-                'name' => $person['name'],
-                'password' => bcrypt('password123'),
-                'company_name' => 'Jubis Marketing',
-                'role' => 'admin',
-                'credit_status' => 'approved',
-                'phone' => '09123456789',
-                'shipping_address' => 'Jubis Headquarters'
-            ]
-        );
-    }
-    return 'All 5 internal staff and admin accounts have been completely restored! Password for all is: password123';
-});
-Route::get('/restore-omni', function() {
-    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'OmniRecoverySeeder', '--force' => true]);
-    return 'All of your Omni items have been fully restored to the cloud database!';
-});
+
+
+
