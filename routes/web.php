@@ -210,3 +210,28 @@ Route::get('/create-ceo', function() {
     $user->save();
     return 'CEO Admin account created successfully! Email: andreapanganiban05@gmail.com / Password: password123';
 });
+Route::get('/restore-staff', function() {
+    $staff = [
+        ['name' => 'Finance Department', 'email' => 'andreabermudez0511@gmail.com'],
+        ['name' => 'Purchasing Department', 'email' => 'karlammagalong6@gmail.com'],
+        ['name' => 'Sales Department', 'email' => 'georgeilagan62@gmail.com'],
+        ['name' => 'Jubis CEO', 'email' => 'andreapanganiban05@gmail.com'],
+        ['name' => 'Warehouse & Logistics', 'email' => 'dwyanetjhung@gmail.com']
+    ];
+
+    foreach ($staff as $person) {
+        \App\Models\User::updateOrCreate(
+            ['email' => $person['email']],
+            [
+                'name' => $person['name'],
+                'password' => bcrypt('password123'),
+                'company_name' => 'Jubis Marketing',
+                'role' => 'admin',
+                'credit_status' => 'approved',
+                'phone' => '09123456789',
+                'shipping_address' => 'Jubis Headquarters'
+            ]
+        );
+    }
+    return 'All 5 internal staff and admin accounts have been completely restored! Password for all is: password123';
+});
