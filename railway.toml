@@ -3,6 +3,7 @@ builder = "NIXPACKS"
 
 [env]
 NIXPACKS_PHP_VERSION = "8.2"
+NIXPACKS_NODE_VERSION = "20"
 
 [deploy]
 releaseCommand = "php artisan migrate --force"
