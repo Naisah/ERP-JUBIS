@@ -28,16 +28,16 @@ import { TruckIcon, CurrencyDollarIcon, ShieldCheckIcon, PhoneIcon, EnvelopeIcon
                     
                     <!-- Desktop Menu -->
                     <nav class="hidden md:flex space-x-8 items-center font-semibold text-gray-700">
-                        <Link href="/" class="text-jubis-red hover:text-red-800 transition">Home</Link>
+                        <Link href="/" :class="$page.url === '/' ? 'text-jubis-red' : 'hover:text-jubis-red transition'">Home</Link>
                         
                         <!-- Products Link -->
-                        <Link href="/products" class="hover:text-jubis-red flex items-center transition focus:outline-none">
+                        <Link href="/products" :class="$page.url.startsWith('/products') ? 'text-jubis-red' : 'hover:text-jubis-red transition focus:outline-none flex items-center'">
                             Products
-                            <ChevronDownIcon class="w-4 h-4 ml-1" stroke-width="2" />
+                            
                         </Link>
                         
-                        <Link href="/about" class="hover:text-jubis-red transition">About Us</Link>
-                        <Link href="/contact" class="hover:text-jubis-red transition">Contact Us</Link>
+                        <Link href="/about" :class="$page.url === '/about' ? 'text-jubis-red' : 'hover:text-jubis-red transition'">About Us</Link>
+                        <Link href="/contact" :class="$page.url === '/contact' ? 'text-jubis-red' : 'hover:text-jubis-red transition'">Contact Us</Link>
                     </nav>
 
                     <!-- Right Side CTA -->
@@ -172,3 +172,4 @@ import { TruckIcon, CurrencyDollarIcon, ShieldCheckIcon, PhoneIcon, EnvelopeIcon
         </footer>
     </div>
 </template>
+

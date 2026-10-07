@@ -16,14 +16,16 @@ const searchQuery = ref(props.filters?.search || '');
 const loadingId = ref(null);
 const selectedCategories = ref(props.filters?.categories ? props.filters.categories.split(',').map(Number) : []);
 const selectedBrands = ref(props.filters?.brands ? props.filters.brands.split(',') : []);
+const sortOrder = ref(props.filters?.sort || 'relevant');
 
 watch(
-    [searchQuery, selectedCategories, selectedBrands],
-    debounce(([search, categories, brands]) => {
+    [searchQuery, selectedCategories, selectedBrands, sortOrder],
+    debounce(([search, categories, brands, sort]) => {
         router.get('/products', {
             search: search,
             categories: categories.join(','),
             brands: brands.join(','),
+            sort: sort,
         }, {
             preserveState: true,
             preserveScroll: true,
@@ -103,13 +105,11 @@ const addToQuote = (productId) => {
                     <!-- Product Grid -->
                     <div class="flex-grow">
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex justify-between items-center text-sm">
-                            <span class="text-gray-500">Showing <span class="font-bold text-gray-800">6</span> results</span>
+                            <span class="text-gray-500">Showing <span class="font-bold text-gray-800">{{ products.total }}</span> results</span>
                             <div class="flex items-center space-x-2">
                                 <span class="text-gray-500 font-medium">Sort by:</span>
-                                <select class="border-gray-200 rounded-lg text-sm focus:ring-jubis-navy focus:border-jubis-navy py-2 pl-3 pr-8 font-medium text-gray-700">
-                                    <option>Most Relevant</option>
-                                    <option>Name (A-Z)</option>
-                                    <option>Brand</option>
+                                <select v-model="sortOrder" class="border-gray-200 rounded-lg text-sm focus:ring-jubis-navy focus:border-jubis-navy py-2 pl-3 pr-8 font-medium text-gray-700">
+                                    <option value="relevant">Most Relevant</option><option value="name">Name (A-Z)</option><option value="brand">Brand</option>
                                 </select>
                             </div>
                         </div>
@@ -204,6 +204,8 @@ const addToQuote = (productId) => {
     background: #94a3b8; 
 }
 </style>
+
+
 
 
 
