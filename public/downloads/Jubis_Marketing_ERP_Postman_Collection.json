@@ -1,0 +1,372 @@
+{
+	"info": {
+		"_postman_id": "jubis-erp-collection-2026",
+		"name": "Jubis Marketing ERP API Collection",
+		"description": "Comprehensive Postman collection for system testing and quality assurance of Jubis Marketing ERP.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Register Client",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Accept", "value": "application/json"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Test B2B Client\",\n  \"email\": \"testb2b@company.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"company_name\": \"Test Engineering Inc.\",\n  \"phone\": \"+639123456789\",\n  \"billing_address\": \"123 Metro Manila, PH\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/register",
+							"host": ["{{base_url}}"],
+							"path": ["register"]
+						}
+					}
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Accept", "value": "application/json"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@jubismarketing.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": ["{{base_url}}"],
+							"path": ["login"]
+						}
+					}
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Accept", "value": "application/json"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"client@engineeringcorp.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/forgot-password",
+							"host": ["{{base_url}}"],
+							"path": ["forgot-password"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Public Catalog & CRM",
+			"item": [
+				{
+					"name": "Get Products Catalog (Paginated)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Accept", "value": "application/json"}
+						],
+						"url": {
+							"raw": "{{base_url}}/products?search=wire&sort=name",
+							"host": ["{{base_url}}"],
+							"path": ["products"],
+							"query": [
+								{"key": "search", "value": "wire"},
+								{"key": "sort", "value": "name"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Product Details by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Accept", "value": "application/json"}
+						],
+						"url": {
+							"raw": "{{base_url}}/products/1",
+							"host": ["{{base_url}}"],
+							"path": ["products", "1"]
+						}
+					}
+				},
+				{
+					"name": "Submit Contact Us Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Accept", "value": "application/json"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"first_name\": \"Juan\",\n  \"last_name\": \"Dela Cruz\",\n  \"email\": \"juan@example.com\",\n  \"company\": \"ABC Builders\",\n  \"phone\": \"09171234567\",\n  \"message\": \"Requesting formal wholesale quotation for industrial wires.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/contact",
+							"host": ["{{base_url}}"],
+							"path": ["contact"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Client Cart & Orders",
+			"item": [
+				{
+					"name": "Add Product to Cart",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Accept", "value": "application/json"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"product_id\": 1,\n  \"quantity\": 5\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cart/add",
+							"host": ["{{base_url}}"],
+							"path": ["cart", "add"]
+						}
+					}
+				},
+				{
+					"name": "Submit Quote Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Accept", "value": "application/json"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"client_notes\": \"Urgent warehouse requirement\",\n  \"shipping_address\": \"Warehouse B, Pasig City\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cart/submit",
+							"host": ["{{base_url}}"],
+							"path": ["cart", "submit"]
+						}
+					}
+				},
+				{
+					"name": "Activate Net-30 Credit Terms",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Accept", "value": "application/json"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/invoices/1/accept-terms",
+							"host": ["{{base_url}}"],
+							"path": ["api", "invoices", "1", "accept-terms"]
+						}
+					}
+				},
+				{
+					"name": "Download Invoice PDF",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/invoices/1/pdf",
+							"host": ["{{base_url}}"],
+							"path": ["invoices", "1", "pdf"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Admin Operations",
+			"item": [
+				{
+					"name": "Export Inventory CSV",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/inventory-export",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "inventory-export"]
+						}
+					}
+				},
+				{
+					"name": "Create Supplier",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Accept", "value": "application/json"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Delta Industrial Corp\",\n  \"brands_carried\": \"Schneider, Fuji\",\n  \"contact_person\": \"Maria Santos\",\n  \"email\": \"maria@deltaindustrial.com\",\n  \"phone\": \"09181234567\",\n  \"address\": \"Caloocan City\",\n  \"tax_id\": \"123-456-789-000\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/suppliers",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "suppliers"]
+						}
+					}
+				},
+				{
+					"name": "Create Purchase Order",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Accept", "value": "application/json"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"supplier_id\": 1,\n  \"expected_delivery_date\": \"2026-11-01\",\n  \"notes\": \"Restock monthly inventory\",\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 50,\n      \"unit_cost\": 110.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/purchase-orders",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "purchase-orders"]
+						}
+					}
+				},
+				{
+					"name": "Update PO Status (Receive Goods)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Accept", "value": "application/json"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"received\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/purchase-orders/1/status",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "purchase-orders", "1", "status"]
+						}
+					}
+				},
+				{
+					"name": "Update Quote Status (Approve Quote)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Accept", "value": "application/json"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"approved\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/quotes/1",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "quotes", "1"]
+						}
+					}
+				},
+				{
+					"name": "Create Shipment & Dispatch",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Accept", "value": "application/json"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"invoice_id\": 1,\n  \"carrier\": \"Lalamove\",\n  \"shipping_address\": \"Warehouse B, Pasig City\",\n  \"delivery_notes\": \"Call upon arrival\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/shipments",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "shipments"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Webhooks & Automations",
+			"item": [
+				{
+					"name": "PayMongo Webhook Event",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"},
+							{"key": "Paymongo-Signature", "value": "t=1728000000,te=simulated_signature"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"data\": {\n    \"id\": \"evt_test123\",\n    \"type\": \"event\",\n    \"attributes\": {\n      \"type\": \"link.payment.paid\",\n      \"data\": {\n        \"id\": \"link_test_ref\"\n      }\n    }\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/webhooks/paymongo",
+							"host": ["{{base_url}}"],
+							"path": ["webhooks", "paymongo"]
+						}
+					}
+				},
+				{
+					"name": "Mock Payment Process",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "application": "json"}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{"key": "payment_method", "value": "gcash", "type": "text"}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/mock/payment/process/invoice/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "mock", "payment", "process", "invoice", "1"]
+						}
+					}
+				},
+				{
+					"name": "Mock Courier Tracking View",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/mock/tracking/LALA-SAMPLE123",
+							"host": ["{{base_url}}"],
+							"path": ["api", "mock", "tracking", "LALA-SAMPLE123"]
+						}
+					}
+				}
+			]
+		}
+	]
+}
