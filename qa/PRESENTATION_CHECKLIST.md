@@ -1,50 +1,45 @@
-# Presentation checklist — hosted ERP
-
-> Historical pre-fix evidence. Local application fixes now pass the complete QA suite; see [FIX_REPORT.md](FIX_REPORT.md). The fixes have since been deployed and smoke-tested; see [DEPLOYED_RETEST_REPORT.md](DEPLOYED_RETEST_REPORT.md). The observations below record the original pre-fix run.
+# Presentation checklist — verified hosted ERP
 
 Site: https://jubis-marketing-production-m2g1zm.laravel.cloud/
 
-Verified 12 October 2026. Read the [hosted QA report](HOSTED_QA_REPORT.md) before presenting the entire system as complete. The main quote/invoice flow works; several advanced screens still have confirmed defects.
+Verified 12 October 2026 after application fixes and presentation configuration were deployed. See [DEPLOYED_RETEST_REPORT.md](DEPLOYED_RETEST_REPORT.md) for evidence and limits. Historical defects remain documented in [HOSTED_QA_REPORT.md](HOSTED_QA_REPORT.md); they are not the current presentation status.
+
+## Ready to demonstrate
+
+| Workflow | Verified result |
+|---|---|
+| Catalog, client/admin login and quote approval | Hosted workflow works. |
+| Quote confirmation | In-page Submit/Cancel and Remove/Cancel work; cancelling preserves the draft. |
+| GCash demo checkout | Pays a labelled QA invoice without requiring card fields. No real money is charged. |
+| Delivery tracking map | Loads with clear demo labels; no actual driver location or dispatch. |
+| Invoice PDF | Correct item, VAT, shipping, paid amount and zero balance; rendered page has no clipping. |
+| Stock and reports | One stock reservation per submitted unit; payment does not deduct stock again. Dashboard/report cash totals agree. |
+| Email notification | Approved Gmail SMTP configuration is deployed. QA shipment email was accepted for sending; Inbox/Spam receipt still awaits owner confirmation. |
 
 ## Rehearsed demonstration
 
-1. Open Home, then Products. Search `PD-35-THHN`; show the product and its variants. Catalog search, sorting, pagination and filters worked.
-2. Sign in with the supplied client account. Show the client dashboard and the approved **QTE-00003** QA quotation for **₱140**. Its invoice is already paid by a simulation.
-3. For a new live demonstration, add one THHN-2.0 unit and use notes beginning `PRESENTATION TEST — do not dispatch`. Expected cart: subtotal ₱125, VAT ₱15, total ₱140. Submitting creates another test record and reserves another unit of stock.
-4. Log out, then sign in with the supplied admin account. Open Quotation Manager, review only that new test quote, and approve it. Open Invoicing & Finance to show the matching invoice.
-5. If demonstrating a payment, explicitly describe it as the **test-card simulation**. With the client signed in, select Credit / Debit Card, use the displayed test card `4242 4242 4242 4242`, expiry `12/28`, CVC `123`, and pay only the newly labelled test invoice. This path worked in QA. Do not use real payment details.
-6. Return to admin Overview and Reports & Analytics. The sale should appear in revenue; the invoice should be paid. Reports have the working top-seller view.
-7. Explain logistics as a simulated integration. Its record can be shown in Logistics & Dispatch; the generated tracking link currently fails.
-
-Do not replay payment against INV-00003; it is already paid. Existing INV-00001/00002 were left unpaid. Passwords are intentionally not stored in this checklist.
-
-## Presentation blockers and alternatives
-
-| Area | Current problem | Presentation choice until fixed |
-|---|---|---|
-| GCash | Pay is blocked by hidden card fields | Use the explicitly labelled test-card simulator. |
-| Tracking/map link | Generated link shows 500 Server Error | Show the shipment list only; disclose that tracking is incomplete. |
-| Invoice PDF | Zero item prices; PDF ₱304 versus website ₱140 | Use the invoice screen to explain accurate item/VAT values. Do not present the PDF as a correct financial document. |
-| Admin PDF | Super admin receives 403 | Avoid this action; client download works but its figures are still wrong. |
-| Email | Website says success; inbox delivery not confirmed | Check Inbox and Spam before presenting email delivery as working. |
-| Stock summary | Counters depend on page and include master folders | Demonstrate a searched sellable SKU's actual stock row, not summary cards. |
-| Top sellers | Overview stays empty after a sale | Show Reports & Analytics. |
-| Tablet | Footer email overflows at 768px | Use the tested desktop size, around 1280px. |
-| Procurement/RMA | No supplier, PO or RMA records; complete save/receive/refund flows not run | Present these as inspected modules, not fully validated workflows. |
+1. Open Home, About and Products. Search `PD-35-THHN` and show its variants.
+2. Sign in with the supplied client account. Show approved QTE-00004 and paid INV-00004: goods 125.00 + VAT 15.00 + simulated shipping 310.00 = 450.00. Download its verified PDF and open its tracking link.
+3. Describe the payment as a simulation and the map as illustrative. The existing paid QA invoice cannot be paid again.
+4. For a new live demonstration, add one THHN-2.0 unit with notes beginning `PRESENTATION TEST — do not dispatch or charge` and a clearly dummy delivery address. The initial quote is 140.00. Submitting reserves another stock unit and creates test data.
+5. Sign in as admin, review only that new labelled quote, and approve it. Create its simulated shipment before payment if demonstrating shipping fees. Use Lalamove as carrier and leave tracking blank; demo mode does not book a driver. The simulator chooses a fee, so use the actual updated invoice total rather than assuming 450.00.
+6. Sign in as client. Select Pay via GCash/Card for that new QA invoice, select GCash, continue and pay only through the visibly labelled demo checkout. Do not use real payment details or older unpaid invoices.
+7. Show the client paid status, PDF, demo tracking, admin invoice and reports. Show the notification email only after actual inbox receipt is confirmed.
 
 ## Before starting
 
 - [ ] Use the hosted Laravel Cloud address, not localtunnel.
 - [ ] Confirm both supplied accounts can sign in in the presentation browser.
-- [ ] Keep real payment details and other customers' invoices out of the demonstration.
-- [ ] Have the [verified QA dashboard screenshot](results/hosted-2026-10-12/admin-dashboard-after-qa.jpg) and [case evidence](results/hosted-2026-10-12/results.json) ready if connectivity drops.
-- [ ] Confirm the QA email arrived before demonstrating notifications.
-- [ ] Rehearse the chosen route once in the presentation browser. This run used Chromium; browser-specific behavior outside it is unverified.
-- [ ] Explain that the QA records affect demo totals: invoice ₱140 paid by simulation, one stock unit reserved, one processing shipment. Application code was unchanged.
+- [ ] Confirm the QA email titled “Demo shipment created — Jubis Marketing (#4)” arrived in Inbox or Spam.
+- [ ] Keep other customers' invoices and real payment details out of the demonstration.
+- [ ] Have the verified PDF and screenshots in local `qa/results/fixes-2026-10-12/presentation/` available if connectivity drops.
+- [ ] Explain that the rehearsed QA records affect demo totals: INV-00004 added 450.00 simulated paid revenue, reserved one additional unit, and created one processing demo shipment. THHN-2.0 stock is now 148; total recorded demo cash is 590.00 across the two paid QA invoices.
+- [ ] The cart is empty after confirmation testing. Its empty draft QTE-00005 remains; it did not reserve stock or become an invoice.
 
-## Follow-up priorities
+Do not replay payment on INV-00003 or INV-00004. Older unpaid invoices remain unchanged. Passwords and email credentials are intentionally excluded from this checklist.
 
-1. Fix tracking, GCash hidden-field validation, PDF line values/totals and authorized PDF access; deploy and rerun those exact cases.
-2. Restrict/remove publicly accessible payment simulators and run the full webhook/ownership security gates before real usage.
-3. Align stock calculations, dates, company details and dashboard top sellers; resolve tablet overflow and unfinished About content.
-4. Verify SMTP delivery and complete the remaining API, concurrency, audit and role checks before production sign-off.
+## Remaining production work
+
+Real PayMongo settlement/provider webhooks, automatic real courier booking, forced MySQL concurrency/load, and provider delivery acceptance still require separate verification. The current Lalamove integration supports presentation simulation and manually entered booking/tracking; adding API keys alone will not implement automatic dispatch. Procurement and RMA have automated local coverage, but their complete hosted business workflows were not exercised in this presentation rehearsal.
+
+Demo payment/tracking flags are deliberately enabled for the presentation. Disable them before treating this environment as real business accounting.

@@ -4,7 +4,7 @@ Presentation demo checkout and illustrative tracking can run without provider cr
 
 ## Email
 
-Confirm the approved sending mailbox/provider first. Enter each credential as a new Cloud shared secret linked only to `Jubis-Marketing · production`; this avoids opening or replacing the existing application/database credentials. Add all required values before enabling the SMTP mailer and deploying.
+The owner approved reusing the existing local Gmail SMTP setup on 12 October 2026. Its nine mail settings were copied privately into Cloud shared secrets linked only to `Jubis-Marketing · production`. No password or sender login is stored in GitHub. This avoided opening or replacing existing application/database credentials. Deployment and a labelled shipment notification are verified in [DEPLOYED_RETEST_REPORT.md](DEPLOYED_RETEST_REPORT.md).
 
 For an approved Gmail sender, use this configuration as a template:
 
@@ -23,9 +23,9 @@ For an approved Gmail sender, use this configuration as a template:
 
 Port 587 uses STARTTLS through the installed SMTP transport. For a different provider, use its documented host, port, scheme and credentials; do not copy Gmail settings blindly. The current Laravel configuration uses `MAIL_SCHEME`; an old `MAIL_ENCRYPTION` setting alone is not sufficient.
 
-Gmail app passwords require 2-Step Verification and may be restricted on some accounts. The mailbox owner must generate/enter the credential themselves. Do not disable account security or use the ERP demo login password as an email credential. See Google's [app password help](https://support.google.com/accounts/answer/185833) and [SMTP connection settings](https://support.google.com/mail/answer/7104828?hl=en-uk).
+Gmail app passwords require 2-Step Verification and may be restricted on some accounts. If a new credential is needed, the mailbox owner must generate it themselves; an existing credential may be copied only with their explicit authorization. Do not disable account security or use the ERP demo login password as an email credential. See Google's [app password help](https://support.google.com/accounts/answer/185833) and [SMTP connection settings](https://support.google.com/mail/answer/7104828?hl=en-uk).
 
-After configuration, deploy once so cached settings refresh. Submit one labelled QA Contact inquiry to the approved recipient and confirm actual inbox receipt, checking spam too. Then verify an authorized QA shipment notification. Record the provider response and independent inbox confirmation; an application success message or a log-mailer entry alone is not delivery proof. If authentication/TLS fails, keep the error visible and correct the provider configuration before another attempt.
+After configuration, deploy once so cached settings refresh. Send a labelled QA shipment notification only to the approved client test address, then confirm actual inbox receipt, checking spam too. Test the Contact form separately when its intended receiving mailbox is confirmed. Record the provider response and independent inbox confirmation; an application success message or a log-mailer entry alone is not delivery proof. If authentication/TLS fails, keep the error visible and correct the provider configuration before another attempt.
 
 ## Courier
 
