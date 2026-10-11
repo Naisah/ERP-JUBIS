@@ -1,5 +1,7 @@
 <script setup>
 import ProductImage from '@/Components/ProductImage.vue';
+import Modal from '@/Components/Modal.vue';
+import { ref } from 'vue';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { TrashIcon, ArrowRightIcon, ShoppingCartIcon } from '@heroicons/vue/24/outline';
@@ -14,16 +16,25 @@ const form = useForm({
     client_notes: ''
 });
 
+const confirmation = ref(null);
+
 const removeItem = (itemId) => {
-    if (confirm('Remove this item from your quote cart?')) {
-        form.delete(route('cart.remove', itemId), {
-            preserveScroll: true
-        });
-    }
+    confirmation.value = { type: 'remove', itemId };
 };
 
 const submitQuote = () => {
-    if (confirm('Are you ready to submit this quote request for review?')) {
+    confirmation.value = { type: 'submit' };
+};
+
+const applyConfirmedAction = () => {
+    const action = confirmation.value;
+    if (!action || form.processing) return;
+    confirmation.value = null;
+    if (action.type === 'remove') {
+        form.delete(route('cart.remove', action.itemId), {
+            preserveScroll: true
+        });
+    } else {
         form.post(route('cart.submit'));
     }
 };
@@ -132,5 +143,15 @@ const submitQuote = () => {
 
             </div>
         </div>
+        <Modal :show="confirmation !== null" max-width="md" aria-labelledby="quote-action-title" aria-describedby="quote-action-description" @close="confirmation = null">
+            <div class="p-6">
+                <h2 id="quote-action-title" class="text-lg font-bold text-jubis-navy">{{ confirmation?.type === 'remove' ? 'Remove this item?' : 'Submit quote request?' }}</h2>
+                <p id="quote-action-description" class="mt-3 text-sm text-gray-600">{{ confirmation?.type === 'remove' ? 'This item will be removed from your draft cart.' : 'Your quote will be sent to the sales team for review. No payment will be charged.' }}</p>
+                <div class="mt-6 flex justify-end gap-3">
+                    <button type="button" class="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50" @click="confirmation = null">Cancel</button>
+                    <button type="button" :disabled="form.processing" class="rounded-md bg-jubis-navy px-4 py-2 text-sm font-semibold text-white hover:bg-blue-900 disabled:opacity-50" @click="applyConfirmedAction">{{ confirmation?.type === 'remove' ? 'Remove item' : 'Submit quote' }}</button>
+                </div>
+            </div>
+        </Modal>
     </PublicLayout>
 </template>

@@ -25,10 +25,14 @@ No new financial or inventory records were created during these hosted smoke che
 
 Local validation before publication: **391 automated tests passed, 1,662 assertions**, including all previously failing release gates; production frontend build passed. MySQL schema migration success is now confirmed on the actual host, but forced concurrent transactions and load tests have not been run there.
 
-## Presentation configuration still pending
+## Presentation configuration follow-up
 
-- Demo checkout and tracking are currently disabled by the production default. Enabling `PAYMENT_SIMULATION_ENABLED` and `LOGISTICS_SIMULATION_ENABLED` on this presentation environment awaits the owner's explicit choice. GCash and the tracking map passed locally; their enabled hosted rehearsal remains pending. Do not describe the map as real driver tracking or demo checkout as payment settlement.
+- The owner subsequently approved enabling demo tools. `PAYMENT_SIMULATION_ENABLED=true` and `LOGISTICS_SIMULATION_ENABLED=true` were added as separate Cloud shared settings linked only to this environment. Deployment 12 completed successfully without opening or changing existing application/database credentials. The enabled hosted checkout/shipping rehearsal is in progress. Do not describe the map as real driver tracking or demo checkout as payment settlement.
 - Cloud's inspected custom/injected environment variable names include no SMTP provider settings. The application default mailer is `log`; no real inbox delivery is established. SMTP/provider credentials and an independently confirmed received message are required before demonstrating email delivery.
 - Real automated courier booking remains unavailable; manually booked tracking numbers are supported. Real PayMongo sandbox settlement/provider-originated webhook verification remains separate.
+
+The browser-native quote confirmation stalled this test browser. It has been replaced locally with an accessible in-page confirmation retaining Submit/Cancel and Remove/Cancel choices. Local browser cancellation kept the draft, and confirmed submission produced exactly one pending one-unit quote with stock 100 -> 99. The production frontend build passed. Publication and hosted revalidation of this follow-up are tracked with the next deployment.
+
+See [EMAIL_AND_COURIER_SETUP.md](EMAIL_AND_COURIER_SETUP.md) for credential entry and provider acceptance requirements.
 
 Evidence stays local in ignored `qa/results/fixes-2026-10-12/`: deployment screenshot, hosted dashboard, invoice PDF/render, tablet screenshot and `host-retest-results.json`. Personal account details, customer figures and provider secrets are not included in this committed report.
