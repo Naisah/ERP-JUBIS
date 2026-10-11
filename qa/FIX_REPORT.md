@@ -1,6 +1,6 @@
 # ERP fixes and local retest — 12 October 2026
 
-**Status: implemented and verified locally; publication approved by the owner.** Hosted deployment and smoke verification must be recorded separately. This report supersedes the open-local-defect status in the earlier execution report; it does not replace the historical hosted observations.
+**Status: implemented, tested and deployed with owner approval.** See [DEPLOYED_RETEST_REPORT.md](DEPLOYED_RETEST_REPORT.md) for the hosted verification and remaining presentation configuration. This report supersedes the open-local-defect status in the earlier execution report; it does not replace the historical hosted observations.
 
 ## What changed
 
@@ -42,7 +42,7 @@ Evidence is saved locally under ignored `qa/results/fix-retest.*`, `fix-standard
 
 ## Remaining limits
 
-- These fixes must be deployed and rechecked on Laravel Cloud before the presentation host can be considered fixed. Follow [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md).
+- Laravel Cloud deployment and focused hosted smoke checks passed. Enabling presentation simulators, SMTP/provider verification and broader release requirements remain separate. Follow [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md).
 - Real SMTP needs working provider settings and an independently confirmed received message. Provider access and inbox receipt were not available in this run.
 - Real Lalamove automatic booking is not implemented. Use an explicitly labelled demonstration or enter a tracking number from a manually booked courier. The demo map does not track a real driver.
 - Real PayMongo sandbox/live settlement and a provider-originated signed webhook have not been executed. HTTP gateway calls and webhook payloads were mocked for deterministic tests. Reconfirm the provider's legacy payment-link contract before accepting real funds.

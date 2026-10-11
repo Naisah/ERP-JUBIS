@@ -1,6 +1,6 @@
 # QA execution report
 
-> Historical pre-fix evidence. Local application fixes now pass the complete QA suite; see [FIX_REPORT.md](FIX_REPORT.md). The hosted website has not yet been redeployed or retested with this candidate.
+> Historical pre-fix evidence. Local application fixes now pass the complete QA suite; see [FIX_REPORT.md](FIX_REPORT.md). The fixes have since been deployed and smoke-tested; see [DEPLOYED_RETEST_REPORT.md](DEPLOYED_RETEST_REPORT.md). The observations below record the original pre-fix run.
 
 Evidence snapshot generated 2026-10-12T00:53:56+08:00. This is a test-plan delivery and an isolated local execution, not production sign-off. Results below come from saved artifacts; rerun report.php after fresh test runs. The candidate commit and deployment metadata must still be attached at release.
 

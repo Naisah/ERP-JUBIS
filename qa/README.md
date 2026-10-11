@@ -1,6 +1,6 @@
 # Jubis Marketing ERP QA pack
 
-**Current fixes/retest:** [FIX_REPORT.md](FIX_REPORT.md). **Publishing steps:** [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md). Application fixes are local; the hosted site still needs deployment.
+**Current fixes/retest:** [FIX_REPORT.md](FIX_REPORT.md). **Publishing steps:** [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md). Application fixes are now deployed; see [DEPLOYED_RETEST_REPORT.md](DEPLOYED_RETEST_REPORT.md) for hosted checks and remaining provider configuration.
 
 Start with [TEST_STRATEGY.md](TEST_STRATEGY.md), [FUNCTIONAL_SCENARIOS.md](FUNCTIONAL_SCENARIOS.md), [ENDPOINT_MATRIX.csv](ENDPOINT_MATRIX.csv), and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). [EXECUTION_REPORT.md](EXECUTION_REPORT.md) records what actually ran; [KNOWN_FINDINGS.md](KNOWN_FINDINGS.md) lists reproducible release defects.
 
@@ -88,4 +88,4 @@ The harness issues requests concurrently, verifies initial/final state and refus
 | HOSTED_QA_REPORT.md | Deployed-site checks, presentation blockers, evidence and remaining release scope |
 | PRESENTATION_CHECKLIST.md | Rehearsed hosted demonstration and current limitations |
 
-The original QA pack documented failures before application fixes. The current candidate also changes the application and adds an integrity migration; see FIX_REPORT.md for verified behavior and remaining provider/staging requirements. GitHub/Laravel Cloud will only receive these fixes after publication and deployment.
+The original QA pack documented failures before application fixes. The current candidate also changes the application and adds an integrity migration; see FIX_REPORT.md for verified behavior and remaining provider/staging requirements. The candidate was published and deployed with owner approval; the hosted retest report records confirmed behavior and outstanding provider/demo configuration.

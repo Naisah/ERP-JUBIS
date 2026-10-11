@@ -1,6 +1,6 @@
 # Reproduced release-gate findings
 
-> Historical pre-fix evidence. Local application fixes now pass the complete QA suite; see [FIX_REPORT.md](FIX_REPORT.md). The hosted website has not yet been redeployed or retested with this candidate.
+> Historical pre-fix evidence. Local application fixes now pass the complete QA suite; see [FIX_REPORT.md](FIX_REPORT.md). The fixes have since been deployed and smoke-tested; see [DEPLOYED_RETEST_REPORT.md](DEPLOYED_RETEST_REPORT.md). The observations below record the original pre-fix run.
 
 Generated from saved release-gates JUnit evidence on 2026-10-12T00:53:56+08:00. Application code is unchanged. Each row is a failing gate instance; related cases may describe one root cause. These are isolated synthetic reproductions, not production exploits or live transactions.
 

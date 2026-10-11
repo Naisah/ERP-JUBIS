@@ -1,6 +1,6 @@
 # Hosted QA report — presentation readiness
 
-> Historical pre-fix evidence. Local application fixes now pass the complete QA suite; see [FIX_REPORT.md](FIX_REPORT.md). The hosted website has not yet been redeployed or retested with this candidate.
+> Historical pre-fix evidence. Local application fixes now pass the complete QA suite; see [FIX_REPORT.md](FIX_REPORT.md). The fixes have since been deployed and smoke-tested; see [DEPLOYED_RETEST_REPORT.md](DEPLOYED_RETEST_REPORT.md). The observations below record the original pre-fix run.
 
 Tested site: https://jubis-marketing-production-m2g1zm.laravel.cloud/
 
