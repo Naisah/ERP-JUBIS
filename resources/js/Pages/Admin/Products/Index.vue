@@ -18,6 +18,7 @@ const props = defineProps({
     products: Object,
     filters: Object,
     totalInventoryValue: Number,
+    stockSummary: Object,
 });
 
 const search = ref(props.filters.search || '');
@@ -76,12 +77,12 @@ const getStockBadge = (product) => {
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Low Stock Alerts</p>
                 <p class="text-2xl font-extrabold text-amber-600 mt-1">
                     <ExclamationTriangleIcon class="w-5 h-5 inline -mt-1 mr-1" />
-                    {{ products.data?.filter(p => !p.variants_count && p.stock_quantity > 0 && p.stock_quantity <= (p.reorder_level || 10)).length || 0 }}
+                    {{ stockSummary?.lowStockCount || 0 }}
                 </p>
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 cursor-pointer hover:ring-2 hover:ring-red-300 transition" @click="applyStockFilter('out')">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Out of Stock</p>
-                <p class="text-2xl font-extrabold text-red-600 mt-1">{{ products.data?.filter(p => !p.variants_count && p.stock_quantity <= 0).length || 0 }}</p>
+                <p class="text-2xl font-extrabold text-red-600 mt-1">{{ stockSummary?.outOfStockCount || 0 }}</p>
             </div>
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
                 <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Inventory Value</p>

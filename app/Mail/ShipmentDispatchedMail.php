@@ -4,8 +4,8 @@ namespace App\Mail;
 
 use App\Models\Shipment;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -30,7 +30,7 @@ class ShipmentDispatchedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Jubis Marketing Order Has Shipped! (#' . $this->shipment->invoice_id . ')',
+            subject: (str_contains($this->shipment->carrier ?? '', 'Simulated') ? 'Demo shipment created' : 'Shipment update').' — Jubis Marketing (#'.$this->shipment->invoice_id.')',
         );
     }
 
@@ -47,7 +47,7 @@ class ShipmentDispatchedMail extends Mailable
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return array<int, Attachment>
      */
     public function attachments(): array
     {

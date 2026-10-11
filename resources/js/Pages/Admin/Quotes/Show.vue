@@ -1,4 +1,5 @@
 <script setup>
+import { businessDate } from '@/Utils/businessDate';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { ArrowLeftIcon, CheckCircleIcon, XCircleIcon, ClockIcon, DocumentTextIcon } from '@heroicons/vue/24/outline';
@@ -39,10 +40,10 @@ const getStatusColor = (status) => {
             </Link>
             
             <div class="flex space-x-3">
-                <button :disabled="form.processing" @click="updateStatus('rejected')" v-if="quote.status !== 'rejected'" class="inline-flex items-center px-4 py-2 border border-red-200 rounded-lg shadow-sm text-sm font-bold text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none transition-colors">
+                <button :disabled="form.processing" @click="updateStatus('rejected')" v-if="['pending', 'reviewed'].includes(quote.status)" class="inline-flex items-center px-4 py-2 border border-red-200 rounded-lg shadow-sm text-sm font-bold text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none transition-colors">
                     <XCircleIcon class="h-5 w-5 mr-1.5" /> Reject Quote
                 </button>
-                <button @click="updateStatus('approved')" v-if="quote.status !== 'approved'" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-green-600 hover:bg-green-700 focus:outline-none transition-colors">
+                <button :disabled="form.processing" @click="updateStatus('approved')" v-if="['pending', 'reviewed'].includes(quote.status)" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-green-600 hover:bg-green-700 focus:outline-none transition-colors">
                     <CheckCircleIcon class="h-5 w-5 mr-1.5" /> Approve & Convert to Invoice
                 </button>
             </div>
@@ -84,13 +85,13 @@ const getStatusColor = (status) => {
                             <tr>
                                 <td colspan="3" class="pt-4 text-right text-sm font-bold text-gray-500">Subtotal (VAT-Exclusive):</td>
                                 <td class="pt-4 text-right text-md font-bold text-gray-700">
-                                    ₱{{ Number(quote.subtotal || (quote.total_amount/1.12)).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}
+                                    ₱{{ Number(quote.subtotal).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="3" class="pt-2 text-right text-sm font-bold text-gray-500">12% VAT:</td>
+                                <td colspan="3" class="pt-2 text-right text-sm font-bold text-gray-500">{{ quote.vat_rate ?? 12 }}% VAT:</td>
                                 <td class="pt-2 text-right text-md font-bold text-gray-700">
-                                    ₱{{ Number(quote.vat_amount || (quote.total_amount - (quote.total_amount/1.12))).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}
+                                    ₱{{ Number(quote.vat_amount).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}
                                 </td>
                             </tr>
                             <tr>
@@ -135,7 +136,7 @@ const getStatusColor = (status) => {
                     </div>
                     <p class="text-xs text-gray-500 mt-4 flex items-center">
                         <ClockIcon class="w-4 h-4 mr-1" />
-                        Submitted: {{ new Date(quote.created_at).toLocaleString('en-US') }}
+                        Submitted: {{ businessDate(quote.created_at, true, $page.props.businessTimezone) }}
                     </p>
                 </div>
 
@@ -167,4 +168,3 @@ const getStatusColor = (status) => {
         </div>
     </AdminLayout>
 </template>
-

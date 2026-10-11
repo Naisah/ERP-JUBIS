@@ -1,4 +1,5 @@
 <script setup>
+import { businessDate } from '@/Utils/businessDate';
 import { Head, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { computed } from 'vue';
@@ -371,9 +372,9 @@ const funnelConversion = computed(() => {
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         <tr v-for="invoice in recentSales" :key="invoice.id" class="hover:bg-gray-50">
-                            <td class="px-6 py-3 font-bold text-jubis-navy">INV-{{ String(invoice.quote_id).padStart(5, '0') }}</td>
+                            <td class="px-6 py-3 font-bold text-jubis-navy">INV-{{ String(invoice.id).padStart(5, '0') }}</td>
                             <td class="px-6 py-3 text-gray-700">{{ invoice.user?.company_name || invoice.user?.name }}</td>
-                            <td class="px-6 py-3 text-gray-500">{{ new Date(invoice.created_at).toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' }) }}</td>
+                            <td class="px-6 py-3 text-gray-500">{{ businessDate(invoice.created_at, false, $page.props.businessTimezone) }}</td>
                             <td class="px-6 py-3 text-right font-bold text-green-700">{{ formatCurrencyFull(invoice.total_amount) }}</td>
                         </tr>
                         <tr v-if="recentSales.length === 0">

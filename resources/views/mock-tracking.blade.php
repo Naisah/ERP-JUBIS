@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Order Tracking | {{ $tracking }}</title>
+    <title>Demo Order Tracking | {{ $tracking }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
@@ -22,7 +22,7 @@
         if ($status === 'dispatched' || $status === 'in_transit') {
             $badgeClass = 'bg-blue-100 text-blue-800';
             $badgeText = 'On the way';
-            $eta = '12 Mins Away';
+            $eta = 'In transit (demo)';
             $progress = 60;
         } elseif ($status === 'delivered') {
             $badgeClass = 'bg-green-100 text-green-800';
@@ -37,7 +37,7 @@
         <div class="flex items-center space-x-3">
             <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-xl">L</div>
             <div>
-                <h1 class="text-lg font-bold text-gray-900 leading-tight">Live Delivery Tracking</h1>
+                <h1 class="text-lg font-bold text-gray-900 leading-tight">Demo Delivery Tracking</h1>
                 <p class="text-sm text-gray-500">Order ID: <span class="font-mono text-gray-700">{{ $tracking }}</span></p>
             </div>
         </div>
@@ -55,6 +55,7 @@
     <main class="relative flex-grow w-full h-full" style="flex: 1 1 auto;">
         <!-- Embedded OpenStreetMap for simulation -->
         <iframe 
+            title="Illustrative delivery area map — not live driver location"
             src="https://www.openstreetmap.org/export/embed.html?bbox=120.97232818603517%2C14.542279261274534%2C121.05472564697267%2C14.596075908581692&amp;layer=mapnik&amp;marker=14.569181674404764%2C121.0135269165039" 
             style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; filter: contrast(1.1) saturate(1.2);"
             frameborder="0" 
@@ -67,10 +68,10 @@
         <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 w-full max-w-md px-4 z-20 pointer-events-none">
             <div class="bg-white rounded-2xl shadow-2xl p-5 border border-gray-100 pointer-events-auto">
                 <div class="flex items-center space-x-4 mb-4">
-                    <img src="https://ui-avatars.com/api/?name=Rider+Juan&background=random" alt="Driver" class="w-12 h-12 rounded-full border-2 border-orange-500">
                     <div>
-                        <h3 class="font-bold text-gray-900">Rider Juan</h3>
-                        <p class="text-sm text-gray-500">Honda Click 125i • Plate: ABC 1234</p>
+                        <h3 class="font-bold text-gray-900">{{ $shipment->carrier }}</h3>
+                        <p class="text-sm text-gray-500">{{ ucfirst(str_replace('_', ' ', $shipment->status)) }}</p>
+                        <p class="text-xs text-gray-500 mt-1">Illustrative map. No live driver location or arrival estimate is available.</p>
                     </div>
                     <div class="ml-auto flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

@@ -1,4 +1,5 @@
 <script setup>
+import { businessDate } from '@/Utils/businessDate';
 import { ref, watch } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
@@ -78,7 +79,7 @@ const getStatusColor = (status) => {
                                 <div class="text-xs text-gray-500">{{ quote.user.name }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ new Date(quote.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) }}
+                                {{ businessDate(quote.created_at, false, $page.props.businessTimezone) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                                 {{ quote.items.length }} items

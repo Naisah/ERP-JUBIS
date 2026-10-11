@@ -1,4 +1,5 @@
 <script setup>
+import { businessDate } from '@/Utils/businessDate';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { ArrowLeftIcon, CurrencyDollarIcon, TruckIcon, CheckCircleIcon, DocumentTextIcon } from '@heroicons/vue/24/outline';
@@ -12,7 +13,8 @@ const canManageShipments = ['super_admin', 'admin', 'warehouse', 'purchasing'].i
 const paymentAmount = ref('');
 
 const paymentForm = useForm({
-    amount_paid: ''
+    amount_paid: '',
+    payment_token: crypto.randomUUID(),
 });
 
 const submitPayment = () => {
@@ -21,6 +23,7 @@ const submitPayment = () => {
         preserveScroll: true,
         onSuccess: () => {
             paymentAmount.value = '';
+            paymentForm.payment_token = crypto.randomUUID();
         }
     });
 };
@@ -47,17 +50,21 @@ const createShipment = () => {
     <AdminLayout>
         <Head :title="`INV-${String(invoice.id).padStart(5, '0')} | Admin`" />
 
-        <div class="mb-6 flex items-center justify-between">
+        <div class="mb-6 flex flex-wrap gap-4 items-center justify-between">
             <div class="flex items-center">
                 <Link :href="route('admin.invoices.index')" class="mr-4 text-gray-500 hover:text-gray-700">
                     <ArrowLeftIcon class="h-6 w-6" />
                 </Link>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">
-                        Invoice #INV-{{ String(invoice.quote_id).padStart(5, '0') }}
+                        Invoice #INV-{{ String(invoice.id).padStart(5, '0') }}
                     </h1>
                 </div>
             </div>
+            <a :href="route('invoices.pdf', invoice.id)" class="inline-flex items-center gap-2 rounded-md bg-jubis-navy px-4 py-2 text-sm font-semibold text-white hover:bg-blue-900">
+                <DocumentTextIcon class="h-5 w-5" />
+                Download PDF Invoice
+            </a>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -75,7 +82,7 @@ const createShipment = () => {
                             <h2 class="text-lg font-bold text-gray-900">Original Quote</h2>
                             <p class="text-sm text-gray-500 mt-1">#QTE-{{ String(invoice.quote_id).padStart(5, '0') }}</p>
                             <p class="text-sm text-gray-500 mt-2 font-bold">Due Date:</p>
-                            <p class="text-sm text-gray-500">{{ new Date(invoice.due_date).toLocaleDateString() }}</p>
+                            <p class="text-sm text-gray-500">{{ businessDate(invoice.due_date, false, $page.props.businessTimezone) }}</p>
                         </div>
                     </div>
 
@@ -99,11 +106,15 @@ const createShipment = () => {
                         <tfoot>
                             <tr>
                                 <td colspan="3" class="py-3 text-right font-medium text-gray-700 border-t">Subtotal (VAT-Exclusive):</td>
-                                <td class="py-3 text-right font-medium text-gray-900 border-t">₱{{ Number(invoice.subtotal || (invoice.total_amount/1.12)).toLocaleString('en-PH', {minimumFractionDigits:2}) }}</td>
+                                <td class="py-3 text-right font-medium text-gray-900 border-t">₱{{ Number(invoice.subtotal).toLocaleString('en-PH', {minimumFractionDigits:2}) }}</td>
                             </tr>
                             <tr>
-                                <td colspan="3" class="py-3 text-right font-medium text-gray-700 border-t">12% VAT:</td>
-                                <td class="py-3 text-right font-medium text-gray-900 border-t">₱{{ Number(invoice.vat_amount || (invoice.total_amount - (invoice.total_amount/1.12))).toLocaleString('en-PH', {minimumFractionDigits:2}) }}</td>
+                                <td colspan="3" class="py-3 text-right font-medium text-gray-700 border-t">{{ invoice.vat_rate }}% VAT:</td>
+                                <td class="py-3 text-right font-medium text-gray-900 border-t">₱{{ Number(invoice.vat_amount).toLocaleString('en-PH', {minimumFractionDigits:2}) }}</td>
+                            </tr>
+                            <tr v-if="Number(invoice.shipping_amount) > 0">
+                                <td colspan="3" class="py-3 text-right font-medium text-gray-700 border-t">Shipping:</td>
+                                <td class="py-3 text-right font-medium text-gray-900 border-t">₱{{ Number(invoice.shipping_amount).toLocaleString('en-PH', {minimumFractionDigits:2}) }}</td>
                             </tr>
                             <tr>
                                 <td colspan="3" class="py-3 text-right font-bold text-gray-900 border-t">Total Invoice Amount:</td>
@@ -171,7 +182,7 @@ const createShipment = () => {
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <span class="text-gray-500 sm:text-sm">₱</span>
                                 </div>
-                                <input type="number" step="0.01" v-model="paymentAmount" required class="block w-full pl-7 rounded-md border-gray-300 focus:ring-jubis-navy focus:border-jubis-navy sm:text-sm" placeholder="0.00">
+                                <input type="number" step="0.01" min="0.01" :max="invoice.balance_due" v-model="paymentAmount" required class="block w-full pl-7 rounded-md border-gray-300 focus:ring-jubis-navy focus:border-jubis-navy sm:text-sm" placeholder="0.00">
                             </div>
                             <button type="submit" :disabled="paymentForm.processing" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
                                 Log
@@ -208,8 +219,5 @@ const createShipment = () => {
         </div>
     </AdminLayout>
 </template>
-
-
-
 
 

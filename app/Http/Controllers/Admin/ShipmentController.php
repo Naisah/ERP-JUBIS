@@ -3,116 +3,125 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Shipment;
+use App\Mail\ShipmentDeliveredMail;
+use App\Mail\ShipmentDispatchedMail;
 use App\Models\Invoice;
+use App\Models\Shipment;
+use App\Services\CompanySettings;
+use App\Services\LalamoveService;
+use App\Support\Money;
 use Illuminate\Http\Request;
+use Illuminate\Mail\Mailable;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class ShipmentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Shipment::with(['invoice.user'])->latest();
-
-        if ($request->has('status') && $request->status) {
+        $query = Shipment::with('invoice.user')->latest();
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
         return Inertia::render('Admin/Shipments/Index', [
             'shipments' => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only(['status'])
+            'filters' => $request->only('status'),
         ]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'invoice_id' => 'required|exists:invoices,id|unique:shipments,invoice_id',
-            'carrier' => 'required|string',
-            'tracking_number' => 'nullable|string',
-            'shipping_address' => 'required|string',
-            'delivery_notes' => 'nullable|string',
+            'carrier' => 'required|string|max:255',
+            'tracking_number' => 'nullable|string|max:255',
+            'shipping_address' => 'required|string|max:2000',
+            'delivery_notes' => 'nullable|string|max:5000',
         ]);
-
-        $shipment = Shipment::create([
-            'invoice_id' => $request->invoice_id,
-            'carrier' => $request->carrier,
-            'tracking_number' => $request->tracking_number,
-            'shipping_address' => $request->shipping_address,
-            'delivery_notes' => $request->delivery_notes,
-            'status' => 'processing',
-        ]);
-        
-        // AUTOMATION: Call Logistics API (Lalamove) if Carrier is set to Auto or Lalamove
-        if (stripos($request->carrier, 'lalamove') !== false || stripos($request->carrier, 'api') !== false || stripos($request->carrier, 'auto') !== false) {
-            $logistics = app(\App\Services\LalamoveService::class);
-            
-            // Assume pickup is Jubis Warehouse
-            $pickup = 'Jubis Marketing Warehouse, Manila, PH'; 
-            $dropoff = $request->shipping_address;
-            
-            $booking = $logistics->bookDelivery($shipment, $pickup, $dropoff);
-            
-            if ($booking['success']) {
-                $shipment->update([
-                    'carrier' => $booking['carrier'],
-                    'tracking_number' => $booking['tracking_number'],
-                    'tracking_url' => $booking['tracking_url'],
-                    'delivery_fee' => $booking['delivery_fee']
-                ]);
-                
-                // AUTOMATION: Fire Email Notification (Gmail SMTP)
-                $client = $shipment->invoice->user;
-                if ($client && $client->email) {
-                    try {
-                        \Illuminate\Support\Facades\Mail::to($client->email)->send(new \App\Mail\ShipmentDispatchedMail($shipment));
-                        \Illuminate\Support\Facades\Log::info("Email successfully dispatched to " . $client->email);
-                    } catch (\Exception $e) {
-                        \Illuminate\Support\Facades\Log::error("Failed to send email: " . $e->getMessage());
-                    }
-                }
-                
-                return redirect()->back()->with('success', 'Shipment created, Lalamove booked, AND Email Receipt dispatched!');
+        $shipment = DB::transaction(function () use ($validated) {
+            $invoice = Invoice::whereKey($validated['invoice_id'])->lockForUpdate()->firstOrFail();
+            if ($invoice->shipments()->exists()) {
+                throw ValidationException::withMessages(['invoice_id' => 'A shipment already exists for this invoice.']);
             }
+            $shipment = Shipment::create($validated + ['status' => 'processing']);
+            if (empty($validated['tracking_number']) && preg_match('/lalamove|api|auto/i', $validated['carrier'])) {
+                $booking = app(LalamoveService::class)->bookDelivery($shipment, app(CompanySettings::class)->all()['company_address'], $shipment->shipping_address);
+                if (! ($booking['success'] ?? false)) {
+                    throw ValidationException::withMessages(['carrier' => $booking['error'] ?? 'Courier booking failed.']);
+                }
+                $shipment->update(Arr::only($booking, ['carrier', 'tracking_number', 'tracking_url', 'delivery_fee']));
+                $fee = Money::cents($shipment->delivery_fee);
+                $total = Money::cents($invoice->total_amount) + $fee;
+                $paid = Money::cents($invoice->amount_paid);
+                $invoice->update([
+                    'shipping_amount' => Money::decimal($fee), 'total_amount' => Money::decimal($total),
+                    'status' => $paid === $total ? 'paid' : ($paid > 0 ? 'partially_paid' : $invoice->status),
+                    'payment_url' => null, 'payment_reference_id' => null,
+                ]);
+            }
+
+            return $shipment;
+        });
+        $accepted = $this->sendNotification($shipment, new ShipmentDispatchedMail($shipment));
+        $message = 'Shipment created. '.($accepted ? 'Notification accepted for sending.' : 'The email notification could not be sent; please check the mail configuration.');
+        if (str_contains($shipment->carrier, 'Simulated')) {
+            $message = 'Demo shipment created; no courier was dispatched. '.($accepted ? 'Notification accepted for sending.' : 'The email notification could not be sent.');
         }
 
-        return redirect()->back()->with('success', 'Shipment successfully created for this invoice.');
+        return back()->with($accepted ? 'success' : 'error', $message);
     }
 
     public function updateStatus(Request $request, Shipment $shipment)
     {
-        $request->validate([
-            'status' => 'required|in:processing,picking_packing,dispatched,in_transit,delivered',
-        ]);
-
-        $updateData = ['status' => $request->status];
-
-        if ($request->status === 'dispatched') {
-            $updateData['shipped_at'] = now();
-        } elseif ($request->status === 'delivered') {
-            $updateData['delivered_at'] = now();
-        }
-
-        $shipment->update($updateData);
-
-        // AUTOMATION: Fire 'Delivered' Email Notification if status changed to delivered
-        if ($request->status === 'delivered') {
-            $client = $shipment->invoice->user;
-            if ($client && $client->email) {
-                try {
-                    \Illuminate\Support\Facades\Mail::to($client->email)->send(new \App\Mail\ShipmentDeliveredMail($shipment));
-                    \Illuminate\Support\Facades\Log::info("Delivery confirmation email successfully dispatched to " . $client->email);
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error("Failed to send delivery email: " . $e->getMessage());
-                }
+        $validated = $request->validate(['status' => 'required|in:processing,picking_packing,dispatched,in_transit,delivered']);
+        $changed = DB::transaction(function () use ($shipment, $validated) {
+            $shipment = Shipment::whereKey($shipment->id)->lockForUpdate()->firstOrFail();
+            if ($shipment->status === $validated['status']) {
+                return false;
             }
-            return redirect()->back()->with('success', 'Shipment marked as Delivered AND Confirmation Email sent to client!');
+            $states = ['processing', 'picking_packing', 'dispatched', 'in_transit', 'delivered'];
+            abort_if(array_search($validated['status'], $states) < array_search($shipment->status, $states), 409, 'Shipment status cannot move backwards.');
+            $updates = ['status' => $validated['status']];
+            if (in_array($validated['status'], ['dispatched', 'in_transit', 'delivered'], true) && ! $shipment->shipped_at) {
+                $updates['shipped_at'] = now()->timezone(config('company.timezone'))->toDateString();
+            }
+            if ($validated['status'] === 'delivered') {
+                $updates['delivered_at'] = now()->timezone(config('company.timezone'))->toDateString();
+            }
+            $shipment->update($updates);
+
+            return true;
+        });
+        if ($changed && $validated['status'] === 'delivered') {
+            $shipment->refresh();
+            $accepted = $this->sendNotification($shipment, new ShipmentDeliveredMail($shipment));
+
+            return back()->with($accepted ? 'success' : 'error', $accepted
+                ? 'Shipment delivered. Confirmation accepted for sending.'
+                : 'Shipment delivered, but the confirmation email could not be sent.');
         }
 
-        return redirect()->back()->with('success', 'Shipment status updated.');
+        return back()->with('success', $changed ? 'Shipment status updated.' : 'Shipment status is already up to date.');
+    }
+
+    private function sendNotification(Shipment $shipment, Mailable $mail): bool
+    {
+        try {
+            $email = $shipment->invoice->user?->email;
+            if (! $email) {
+                return false;
+            }
+            Mail::to($email)->send($mail);
+
+            return true;
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return false;
+        }
     }
 }
-
-
-
-

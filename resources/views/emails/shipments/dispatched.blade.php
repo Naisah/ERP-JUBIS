@@ -20,7 +20,10 @@
         
         <div class="content">
             <h2 style="color: #111827; margin-top: 0;">Good news, {{ $shipment->invoice->user->name ?? 'Valued Client' }}!</h2>
-            <p>Your order for Invoice <strong>#{{ str_pad($shipment->invoice_id, 5, '0', STR_PAD_LEFT) }}</strong> has been successfully booked and is currently processing for delivery.</p>
+            <p>A shipment record has been created for Invoice <strong>#{{ str_pad($shipment->invoice_id, 5, '0', STR_PAD_LEFT) }}</strong>. Current status: {{ str_replace('_', ' ', $shipment->status) }}.</p>
+            @if(str_contains($shipment->carrier ?? '', 'Simulated'))
+                <p><strong>Demo only: no real courier has been booked or dispatched.</strong></p>
+            @endif
             
             <p><strong>Courier:</strong> {{ $shipment->carrier }}</p>
             <p><strong>Shipping To:</strong> {{ $shipment->shipping_address }}</p>
@@ -28,8 +31,8 @@
             <div class="tracking-box">
                 <h3 style="margin-top: 0; color: #374151;">Tracking Number: {{ $shipment->tracking_number }}</h3>
                 @if($shipment->tracking_url)
-                    <p>You can track your delivery live on the map using the link below:</p>
-                    <a href="{{ $shipment->tracking_url }}" class="button">Track My Delivery Live</a>
+                    <p>View the shipment status using the link below:</p>
+                    <a href="{{ $shipment->tracking_url }}" class="button">View Delivery Tracking</a>
                 @else
                     <p>Please use this tracking number on the courier's website.</p>
                 @endif

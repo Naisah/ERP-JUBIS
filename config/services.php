@@ -1,6 +1,16 @@
 <?php
 
 return [
+    'paymongo' => [
+        'secret_key' => env('PAYMONGO_SECRET_KEY'),
+        'webhook_secret' => env('PAYMONGO_WEBHOOK_SECRET'),
+        'simulation' => env('PAYMENT_SIMULATION_ENABLED', in_array(env('APP_ENV'), ['local', 'testing'], true)),
+    ],
+    'lalamove' => [
+        'api_key' => env('LALAMOVE_API_KEY'),
+        'api_secret' => env('LALAMOVE_API_SECRET'),
+        'simulation' => env('LOGISTICS_SIMULATION_ENABLED', in_array(env('APP_ENV'), ['local', 'testing'], true)),
+    ],
 
     /*
     |--------------------------------------------------------------------------

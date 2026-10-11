@@ -1,0 +1,985 @@
+[
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/sanctum/csrf-cookie",
+        "name": "sanctum.csrf-cookie",
+        "action": "Laravel\\Sanctum\\Http\\Controllers\\CsrfCookieController@show",
+        "middleware": [
+            "web"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/up",
+        "name": null,
+        "action": "Closure",
+        "middleware": [],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/",
+        "name": null,
+        "action": "Closure",
+        "middleware": [
+            "web"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/products",
+        "name": "products.index",
+        "action": "Closure",
+        "middleware": [
+            "web"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/products/{id}",
+        "name": "products.show",
+        "action": "Closure",
+        "middleware": [
+            "web"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/about",
+        "name": "about",
+        "action": "Closure",
+        "middleware": [
+            "web"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/contact",
+        "name": "contact",
+        "action": "Closure",
+        "middleware": [
+            "web"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/contact",
+        "name": "contact.submit",
+        "action": "Closure",
+        "middleware": [
+            "web",
+            "throttle:5,1"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/dashboard",
+        "name": "dashboard",
+        "action": "Closure",
+        "middleware": [
+            "web",
+            "auth",
+            "verified"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/dashboard",
+        "name": "admin.dashboard",
+        "action": "App\\Http\\Controllers\\Admin\\DashboardController@index",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,finance,purchasing,warehouse,sales"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/inventory-export",
+        "name": "admin.products.export",
+        "action": "App\\Http\\Controllers\\Admin\\ProductController@exportCsv",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,warehouse,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/inventory",
+        "name": "admin.products.index",
+        "action": "App\\Http\\Controllers\\Admin\\ProductController@index",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,warehouse,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/inventory/create",
+        "name": "admin.products.create",
+        "action": "App\\Http\\Controllers\\Admin\\ProductController@create",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,warehouse,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/admin/inventory",
+        "name": "admin.products.store",
+        "action": "App\\Http\\Controllers\\Admin\\ProductController@store",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,warehouse,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/inventory/{product}/edit",
+        "name": "admin.products.edit",
+        "action": "App\\Http\\Controllers\\Admin\\ProductController@edit",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,warehouse,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "PUT",
+            "PATCH"
+        ],
+        "uri": "/admin/inventory/{product}",
+        "name": "admin.products.update",
+        "action": "App\\Http\\Controllers\\Admin\\ProductController@update",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,warehouse,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "DELETE"
+        ],
+        "uri": "/admin/inventory/{product}",
+        "name": "admin.products.destroy",
+        "action": "App\\Http\\Controllers\\Admin\\ProductController@destroy",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,warehouse,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/shipments",
+        "name": "admin.shipments.index",
+        "action": "App\\Http\\Controllers\\Admin\\ShipmentController@index",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,warehouse,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/admin/shipments",
+        "name": "admin.shipments.store",
+        "action": "App\\Http\\Controllers\\Admin\\ShipmentController@store",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,warehouse,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/admin/shipments/{shipment}/status",
+        "name": "admin.shipments.status",
+        "action": "App\\Http\\Controllers\\Admin\\ShipmentController@updateStatus",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,warehouse,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/suppliers",
+        "name": "admin.suppliers.index",
+        "action": "App\\Http\\Controllers\\Admin\\SupplierController@index",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/admin/suppliers",
+        "name": "admin.suppliers.store",
+        "action": "App\\Http\\Controllers\\Admin\\SupplierController@store",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "PUT",
+            "PATCH"
+        ],
+        "uri": "/admin/suppliers/{supplier}",
+        "name": "admin.suppliers.update",
+        "action": "App\\Http\\Controllers\\Admin\\SupplierController@update",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "DELETE"
+        ],
+        "uri": "/admin/suppliers/{supplier}",
+        "name": "admin.suppliers.destroy",
+        "action": "App\\Http\\Controllers\\Admin\\SupplierController@destroy",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/purchase-orders",
+        "name": "admin.purchase-orders.index",
+        "action": "App\\Http\\Controllers\\Admin\\PurchaseOrderController@index",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/purchase-orders/create",
+        "name": "admin.purchase-orders.create",
+        "action": "App\\Http\\Controllers\\Admin\\PurchaseOrderController@create",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/admin/purchase-orders",
+        "name": "admin.purchase-orders.store",
+        "action": "App\\Http\\Controllers\\Admin\\PurchaseOrderController@store",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/purchase-orders/{purchase_order}",
+        "name": "admin.purchase-orders.show",
+        "action": "App\\Http\\Controllers\\Admin\\PurchaseOrderController@show",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/admin/purchase-orders/{purchase_order}/status",
+        "name": "admin.purchase-orders.status",
+        "action": "App\\Http\\Controllers\\Admin\\PurchaseOrderController@updateStatus",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,purchasing"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/quotes",
+        "name": "admin.quotes.index",
+        "action": "App\\Http\\Controllers\\Admin\\QuoteController@index",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,sales,finance"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/quotes/{quote}",
+        "name": "admin.quotes.show",
+        "action": "App\\Http\\Controllers\\Admin\\QuoteController@show",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,sales,finance"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "PUT",
+            "PATCH"
+        ],
+        "uri": "/admin/quotes/{quote}",
+        "name": "admin.quotes.update",
+        "action": "App\\Http\\Controllers\\Admin\\QuoteController@update",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,sales,finance"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/invoices",
+        "name": "admin.invoices.index",
+        "action": "App\\Http\\Controllers\\Admin\\InvoiceController@index",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,finance"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/invoices/{invoice}",
+        "name": "admin.invoices.show",
+        "action": "App\\Http\\Controllers\\Admin\\InvoiceController@show",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,finance"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/rmas",
+        "name": "admin.rmas.index",
+        "action": "App\\Http\\Controllers\\Admin\\RMAController@index",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,finance"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/admin/invoices/{invoice}/payment",
+        "name": "admin.invoices.payment",
+        "action": "App\\Http\\Controllers\\Admin\\InvoiceController@updatePayment",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,finance"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/reports",
+        "name": "admin.reports.index",
+        "action": "App\\Http\\Controllers\\Admin\\ReportController@index",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin,finance"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/settings",
+        "name": "admin.settings",
+        "action": "Closure",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/admin/settings",
+        "name": "admin.settings.update",
+        "action": "Closure",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/admin/users",
+        "name": "admin.users.index",
+        "action": "App\\Http\\Controllers\\Admin\\UserController@index",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/admin/users",
+        "name": "admin.users.store",
+        "action": "App\\Http\\Controllers\\Admin\\UserController@store",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "PUT",
+            "PATCH"
+        ],
+        "uri": "/admin/users/{user}",
+        "name": "admin.users.update",
+        "action": "App\\Http\\Controllers\\Admin\\UserController@update",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "DELETE"
+        ],
+        "uri": "/admin/users/{user}",
+        "name": "admin.users.destroy",
+        "action": "App\\Http\\Controllers\\Admin\\UserController@destroy",
+        "middleware": [
+            "web",
+            "auth",
+            "role:super_admin,admin"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/cart",
+        "name": "cart.index",
+        "action": "App\\Http\\Controllers\\QuoteController@cart",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/cart/add",
+        "name": "cart.add",
+        "action": "App\\Http\\Controllers\\QuoteController@add",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "DELETE"
+        ],
+        "uri": "/cart/{item}",
+        "name": "cart.remove",
+        "action": "App\\Http\\Controllers\\QuoteController@remove",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/cart/submit",
+        "name": "cart.submit",
+        "action": "App\\Http\\Controllers\\QuoteController@submit",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/invoices/{id}/rma",
+        "name": "cart.rma",
+        "action": "App\\Http\\Controllers\\QuoteController@requestRMA",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/invoices/{invoice}/pdf",
+        "name": "invoices.pdf",
+        "action": "Closure",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/profile",
+        "name": "profile.edit",
+        "action": "App\\Http\\Controllers\\ProfileController@edit",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "PATCH"
+        ],
+        "uri": "/profile",
+        "name": "profile.update",
+        "action": "App\\Http\\Controllers\\ProfileController@update",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "DELETE"
+        ],
+        "uri": "/profile",
+        "name": "profile.destroy",
+        "action": "App\\Http\\Controllers\\ProfileController@destroy",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/register",
+        "name": "register",
+        "action": "App\\Http\\Controllers\\Auth\\RegisteredUserController@create",
+        "middleware": [
+            "web",
+            "guest"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/register",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Auth\\RegisteredUserController@store",
+        "middleware": [
+            "web",
+            "guest"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/login",
+        "name": "login",
+        "action": "App\\Http\\Controllers\\Auth\\AuthenticatedSessionController@create",
+        "middleware": [
+            "web",
+            "guest"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/login",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Auth\\AuthenticatedSessionController@store",
+        "middleware": [
+            "web",
+            "guest"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/forgot-password",
+        "name": "password.request",
+        "action": "App\\Http\\Controllers\\Auth\\PasswordResetLinkController@create",
+        "middleware": [
+            "web",
+            "guest"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/forgot-password",
+        "name": "password.email",
+        "action": "App\\Http\\Controllers\\Auth\\PasswordResetLinkController@store",
+        "middleware": [
+            "web",
+            "guest"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/reset-password/{token}",
+        "name": "password.reset",
+        "action": "App\\Http\\Controllers\\Auth\\NewPasswordController@create",
+        "middleware": [
+            "web",
+            "guest"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/reset-password",
+        "name": "password.store",
+        "action": "App\\Http\\Controllers\\Auth\\NewPasswordController@store",
+        "middleware": [
+            "web",
+            "guest"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/verify-email",
+        "name": "verification.notice",
+        "action": "App\\Http\\Controllers\\Auth\\EmailVerificationPromptController",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/verify-email/{id}/{hash}",
+        "name": "verification.verify",
+        "action": "App\\Http\\Controllers\\Auth\\VerifyEmailController",
+        "middleware": [
+            "web",
+            "auth",
+            "signed",
+            "throttle:6,1"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/email/verification-notification",
+        "name": "verification.send",
+        "action": "App\\Http\\Controllers\\Auth\\EmailVerificationNotificationController@store",
+        "middleware": [
+            "web",
+            "auth",
+            "throttle:6,1"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/confirm-password",
+        "name": "password.confirm",
+        "action": "App\\Http\\Controllers\\Auth\\ConfirmablePasswordController@show",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/confirm-password",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Auth\\ConfirmablePasswordController@store",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "PUT"
+        ],
+        "uri": "/password",
+        "name": "password.update",
+        "action": "App\\Http\\Controllers\\Auth\\PasswordController@update",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/logout",
+        "name": "logout",
+        "action": "App\\Http\\Controllers\\Auth\\AuthenticatedSessionController@destroy",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/webhooks/paymongo",
+        "name": null,
+        "action": "App\\Http\\Controllers\\WebhookController@handlePayMongo",
+        "middleware": [
+            "web"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/api/mock/payment/invoice/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\WebhookController@simulatePayment",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/api/mock/payment/process/invoice/{id}",
+        "name": null,
+        "action": "App\\Http\\Controllers\\WebhookController@processPayment",
+        "middleware": [
+            "web",
+            "auth",
+            "throttle:10,1"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/invoices/{invoice}/checkout",
+        "name": "invoices.checkout",
+        "action": "App\\Http\\Controllers\\WebhookController@checkout",
+        "middleware": [
+            "web",
+            "auth",
+            "throttle:10,1"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "POST"
+        ],
+        "uri": "/api/invoices/{invoice}/accept-terms",
+        "name": null,
+        "action": "App\\Http\\Controllers\\Admin\\InvoiceController@acceptTerms",
+        "middleware": [
+            "web",
+            "auth"
+        ],
+        "handler_exists": true
+    },
+    {
+        "methods": [
+            "GET"
+        ],
+        "uri": "/api/mock/tracking/{tracking}",
+        "name": null,
+        "action": "Closure",
+        "middleware": [
+            "web",
+            "throttle:60,1"
+        ],
+        "handler_exists": true
+    }
+]

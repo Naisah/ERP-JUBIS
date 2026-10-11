@@ -26,7 +26,7 @@
             <svg class="w-8 h-8 mr-3 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
             Jubis Marketing
         </h1>
-        <p class="text-slate-500 text-sm mt-1 font-medium uppercase tracking-widest">Secure Checkout Portal</p>
+        <p class="text-slate-500 text-sm mt-1 font-medium">Demo checkout — no real money will be charged</p>
     </div>
 
     <div class="max-w-md w-full glass-panel rounded-2xl shadow-2xl overflow-hidden border border-gray-100 relative transition-all duration-300">
@@ -35,20 +35,21 @@
         <form id="main-form" action="{{ url('/api/mock/payment/process/invoice/' . $invoice->id) }}" method="POST">
             @csrf
             <input type="hidden" name="payment_method" id="final_method_input" value="">
+            <input type="hidden" name="expected_balance" value="{{ $invoice->balance_due }}">
             
             <!-- Default Header for Selection & Card -->
             <div id="standard-header" class="bg-slate-900 px-6 py-5 text-center relative overflow-hidden">
                 <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, #000 0, #000 1px, transparent 0, transparent 50%); background-size: 10px 10px;"></div>
                 <h2 class="text-white text-lg font-bold tracking-wider relative z-10">ORDER SUMMARY</h2>
                 <div class="text-slate-300 text-xs mt-1 relative z-10 flex justify-center space-x-2">
-                    <span>Invoice #INV-{{ str_pad($invoice->quote_id, 5, '0', STR_PAD_LEFT) }}</span>
+                    <span>Invoice #INV-{{ str_pad($invoice->id, 5, '0', STR_PAD_LEFT) }}</span>
                 </div>
             </div>
 
             <!-- Amount Display -->
             <div id="amount-display" class="p-6 text-center bg-white border-b border-gray-100">
                 <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Due</p>
-                <h1 class="text-4xl font-extrabold text-slate-900">₱{{ number_format($invoice->total_amount, 2) }}</h1>
+                <h1 class="text-4xl font-extrabold text-slate-900">₱{{ number_format($invoice->balance_due, 2) }}</h1>
             </div>
 
             <div class="p-6 bg-white">
@@ -80,7 +81,7 @@
                         <!-- QR Ph Option -->
                         <label class="flex items-center p-4 border-2 border-slate-200 rounded-xl cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all duration-200" onclick="selectMethod('qrph', this)">
                             <input type="radio" name="method_select" value="qrph" class="w-5 h-5 text-blue-600 focus:ring-blue-500 border-slate-300">
-                            <span class="ml-3 font-bold text-slate-700 flex-1">QR Ph (Live API)</span>
+                            <span class="ml-3 font-bold text-slate-700 flex-1">QR Ph (Demo)</span>
                             <div class="bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded flex items-center">
                                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24"><path d="M4 4h4v4H4V4zm6 0h10v2H10V4zm0 4h10v2H10V8zm0 4h10v2H10v-2zM4 10h4v4H4v-4zm0 6h4v4H4v-4zm6 0h10v2H10v-2zm0 4h10v2H10v-2z"/></svg> QR Ph
                             </div>
@@ -113,22 +114,22 @@
                     <div class="space-y-4 mb-8">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Card Number</label>
-                            <input type="text" placeholder="4242 4242 4242 4242" class="w-full border-slate-300 rounded-lg shadow-sm px-4 py-3 border focus:ring-blue-500 focus:border-blue-500 font-mono bg-slate-50" required>
+                            <input aria-label="Test card number" type="text" placeholder="4242 4242 4242 4242" class="w-full border-slate-300 rounded-lg shadow-sm px-4 py-3 border focus:ring-blue-500 focus:border-blue-500 font-mono bg-slate-50" disabled>
                         </div>
                         <div class="flex gap-4">
                             <div class="flex-1">
                                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Expiry</label>
-                                <input type="text" placeholder="MM/YY" class="w-full border-slate-300 rounded-lg shadow-sm px-4 py-3 border focus:ring-blue-500 focus:border-blue-500 font-mono bg-slate-50" required>
+                                <input aria-label="Test card expiry" type="text" placeholder="MM/YY" class="w-full border-slate-300 rounded-lg shadow-sm px-4 py-3 border focus:ring-blue-500 focus:border-blue-500 font-mono bg-slate-50" disabled>
                             </div>
                             <div class="flex-1">
                                 <label class="block text-xs font-bold text-slate-700 uppercase mb-1">CVC</label>
-                                <input type="password" placeholder="***" class="w-full border-slate-300 rounded-lg shadow-sm px-4 py-3 border focus:ring-blue-500 focus:border-blue-500 font-mono bg-slate-50" required>
+                                <input aria-label="Test card CVC" type="password" placeholder="***" class="w-full border-slate-300 rounded-lg shadow-sm px-4 py-3 border focus:ring-blue-500 focus:border-blue-500 font-mono bg-slate-50" disabled>
                             </div>
                         </div>
                     </div>
                     <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-transform transform hover:scale-[1.02] flex justify-between px-6 items-center">
                         <span>Pay Securely</span>
-                        <span class="text-lg">₱{{ number_format($invoice->total_amount, 2) }}</span>
+                        <span class="text-lg">₱{{ number_format($invoice->balance_due, 2) }}</span>
                     </button>
                 </div>
             </div>
@@ -165,7 +166,7 @@
                                 <span class="text-gray-500 font-medium text-sm">GCash</span>
                                 <div class="flex items-center">
                                     <div class="text-right mr-3">
-                                        <p class="text-gray-700 font-medium text-sm">PHP {{ number_format($invoice->total_amount + 5000, 2) }}</p>
+                                        <p class="text-gray-700 font-medium text-sm">PHP {{ number_format($invoice->balance_due + 5000, 2) }}</p>
                                         <p class="text-gray-400 text-xs">Available Balance</p>
                                     </div>
                                     <!-- Custom Radio Button (Selected) -->
@@ -181,11 +182,11 @@
                             <h3 class="text-gray-400 text-xs font-bold uppercase mb-4 tracking-wider">You are about to pay</h3>
                             <div class="flex justify-between mb-4">
                                 <span class="text-gray-400 text-sm font-medium">Amount</span>
-                                <span class="text-gray-600 text-sm font-medium">PHP {{ number_format($invoice->total_amount, 2) }}</span>
+                                <span class="text-gray-600 text-sm font-medium">PHP {{ number_format($invoice->balance_due, 2) }}</span>
                             </div>
                             <div class="flex justify-between border-t border-gray-100 pt-5 mt-2">
                                 <span class="text-gray-600 font-bold text-sm">Total</span>
-                                <span class="text-black font-extrabold text-xl">PHP {{ number_format($invoice->total_amount, 2) }}</span>
+                                <span class="text-black font-extrabold text-xl">PHP {{ number_format($invoice->balance_due, 2) }}</span>
                             </div>
                         </div>
                         
@@ -196,7 +197,7 @@
                             </p>
                             
                             <button type="submit" class="w-full bg-[#005ce6] hover:bg-blue-700 text-white font-bold py-3.5 rounded-full shadow-sm transition-colors text-sm uppercase tracking-wide">
-                                Pay PHP {{ number_format($invoice->total_amount, 2) }}
+                                Pay PHP {{ number_format($invoice->balance_due, 2) }}
                             </button>
                         </div>
                         
@@ -214,12 +215,19 @@
         <p class="mb-2">&copy; {{ date('Y') }} Jubis Marketing. All rights reserved.</p>
         <p class="flex items-center bg-slate-200 px-3 py-1 rounded-full text-slate-500 font-medium">
             <svg class="w-3 h-3 mr-1 text-slate-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
-            Secured by PayMongo API Sandbox
+            Local payment simulation. Use test details only.
         </p>
     </div>
 
     <script>
         let selectedMethod = null;
+
+        function setCardFields(enabled) {
+            document.querySelectorAll('#view-card input').forEach(input => {
+                input.disabled = !enabled;
+                input.required = enabled;
+            });
+        }
 
         function selectMethod(method, element) {
             selectedMethod = method;
@@ -245,10 +253,11 @@
             }
 
             document.getElementById('final_method_input').value = selectedMethod;
+            setCardFields(selectedMethod === 'card');
 
             if (selectedMethod === 'qrph') {
                 // Submit directly for QR Ph (redirects to live API)
-                document.getElementById('main-form').submit();
+                document.getElementById('main-form').requestSubmit();
                 return;
             }
 
@@ -266,6 +275,7 @@
         }
 
         function goBack() {
+            setCardFields(false);
             document.getElementById('view-card').classList.add('hidden');
             document.getElementById('view-gcash').classList.add('hidden');
             
@@ -273,6 +283,10 @@
             document.getElementById('amount-display').classList.remove('hidden');
             document.getElementById('view-selection').classList.remove('hidden');
         }
+
+        document.getElementById('main-form').addEventListener('submit', () => {
+            document.querySelectorAll('button[type="submit"]').forEach(button => button.disabled = true);
+        });
     </script>
 </body>
 </html>

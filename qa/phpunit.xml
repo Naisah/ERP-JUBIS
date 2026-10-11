@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="bootstrap.php" colors="true" cacheResult="false" failOnWarning="true" failOnRisky="true">
+    <testsuites><testsuite name="ERP QA"><directory>tests</directory></testsuite></testsuites>
+    <logging><junit outputFile="results/junit.xml"/></logging>
+</phpunit>

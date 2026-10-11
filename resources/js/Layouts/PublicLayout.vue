@@ -137,15 +137,15 @@ watch(() => page.url, () => { mobileMenuOpen.value = false; });
                     <ul class="space-y-3 text-sm text-gray-400">
                         <li class="flex items-start">
                             <PhoneIcon class="w-5 h-5 mr-3 flex-shrink-0 text-gray-500" />
-                            <span>(02) 8801-1688<br>Viber: 0968-7045013</span>
+                            <span class="min-w-0 break-words">{{ $page.props.settings.contact_phone }}</span>
                         </li>
                         <li class="flex items-start">
                             <EnvelopeIcon class="w-5 h-5 mr-3 flex-shrink-0 text-gray-500" />
-                            <span>Jubismarketing@gmail.com</span>
+                            <a :href="`mailto:${$page.props.settings.contact_email}`" class="min-w-0 break-all hover:text-jubis-gold">{{ $page.props.settings.contact_email }}</a>
                         </li>
                         <li class="flex items-start leading-tight">
                             <MapPinIcon class="w-5 h-5 mr-3 flex-shrink-0 text-gray-500" />
-                            <span>22 Gonzales Compound, Almanza I,<br>Las Pinas City 1750, Philippines</span>
+                            <span class="min-w-0 break-words">{{ $page.props.settings.company_address }}</span>
                         </li>
                     </ul>
                 </div>

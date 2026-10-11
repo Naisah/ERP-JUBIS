@@ -146,7 +146,7 @@ const doughnutChartOptions = {
                             </thead>
                             <tbody class="divide-y divide-gray-200 bg-white">
                                 <tr v-for="invoice in recentInvoices" :key="invoice.id">
-                                    <td class="px-6 py-4 font-medium text-gray-900">INV-{{ String(invoice.quote_id).padStart(5,'0') }}</td>
+                                    <td class="px-6 py-4 font-medium text-gray-900">INV-{{ String(invoice.id).padStart(5,'0') }}</td>
                                     <td class="px-6 py-4 text-gray-500">{{ invoice.user?.company_name || invoice.user?.name }}</td>
                                     <td class="px-6 py-4 text-right font-bold text-gray-900">₱{{ Number(invoice.total_amount).toLocaleString('en-PH', {minimumFractionDigits:2}) }}</td>
                                     <td class="px-6 py-4 text-right">

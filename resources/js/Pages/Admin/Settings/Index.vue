@@ -12,9 +12,10 @@ const props = defineProps({
 
 const form = useForm({
     company_name: props.settings?.company_name || 'Jubis Marketing',
-    company_address: props.settings?.company_address || '123 Business Road, Metro Manila, Philippines',
-    contact_email: props.settings?.contact_email || 'contact@jubismarketing.com',
-    contact_phone: props.settings?.contact_phone || '+63 912 345 6789',
+    company_address: props.settings?.company_address || '',
+    contact_email: props.settings?.contact_email || '',
+    contact_phone: props.settings?.contact_phone || '',
+    tax_id: props.settings?.tax_id || '',
     vat_rate: props.settings?.vat_rate ?? 12,
     about_us_tagline: props.settings?.about_us_tagline || 'Your premier distributor of high-quality electrical supplies and industrial equipment in the Philippines.',
     about_us_history: props.settings?.about_us_history || 'Jubis Marketing was established in 2006 by founder Juberth Bisnan...',
@@ -23,7 +24,6 @@ const form = useForm({
 const submit = () => {
     form.post(route('admin.settings.update'), {
         preserveScroll: true,
-        onSuccess: () => alert('Settings saved successfully!')
     });
 };
 </script>
@@ -59,6 +59,11 @@ const submit = () => {
                         <div>
                             <InputLabel for="contact_phone" value="Contact Phone" />
                             <TextInput id="contact_phone" v-model="form.contact_phone" type="text" class="mt-1 block w-full" />
+                        </div>
+                        <div>
+                            <InputLabel for="tax_id" value="Tax Identification Number (optional)" />
+                            <TextInput id="tax_id" v-model="form.tax_id" type="text" class="mt-1 block w-full" />
+                            <p class="mt-2 text-xs text-gray-500">Enter the registered company TIN. Leave blank if it has not been confirmed.</p>
                         </div>
                     </div>
                 </div>

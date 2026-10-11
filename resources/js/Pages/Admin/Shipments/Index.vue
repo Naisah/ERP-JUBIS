@@ -1,4 +1,5 @@
 <script setup>
+import { businessDate } from '@/Utils/businessDate';
 import Pagination from '@/Components/Pagination.vue';
 import { Head, router } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
@@ -52,7 +53,7 @@ const updateStatus = (id, newStatus) => {
                             <div class="text-xs text-gray-500">via {{ shipment.carrier }}</div>
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-gray-900">
-                            <div class="font-medium text-jubis-navy">INV-{{ String(shipment.invoice.quote_id).padStart(5, '0') }}</div>
+                            <div class="font-medium text-jubis-navy">INV-{{ String(shipment.invoice.id).padStart(5, '0') }}</div>
                         </td>
                         <td class="px-3 py-4 text-gray-900 max-w-xs truncate">
                             <div class="font-bold">{{ shipment.invoice?.user?.company_name || shipment.invoice?.user?.name }}</div>
@@ -64,8 +65,8 @@ const updateStatus = (id, newStatus) => {
                             </span>
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-xs text-gray-600">
-                            <div v-if="shipment.shipped_at">Shipped: {{ new Date(shipment.shipped_at).toLocaleDateString() }}</div>
-                            <div v-if="shipment.delivered_at" class="text-green-600 font-bold mt-1">Delivered: {{ new Date(shipment.delivered_at).toLocaleDateString() }}</div>
+                            <div v-if="shipment.shipped_at">Shipped: {{ businessDate(shipment.shipped_at, false, $page.props.businessTimezone) }}</div>
+                            <div v-if="shipment.delivered_at" class="text-green-600 font-bold mt-1">Delivered: {{ businessDate(shipment.delivered_at, false, $page.props.businessTimezone) }}</div>
                         </td>
                         <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right font-medium">
                             <select @change="updateStatus(shipment.id, $event.target.value)" :value="shipment.status" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-jubis-navy focus:ring-jubis-navy text-xs py-1">

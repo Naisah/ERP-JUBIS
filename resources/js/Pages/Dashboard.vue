@@ -1,4 +1,5 @@
 <script setup>
+import { businessDate } from '@/Utils/businessDate';
 import { Head, Link } from '@inertiajs/vue3';
 import PublicLayout from '@/Layouts/PublicLayout.vue';
 import { ShoppingCartIcon, ClockIcon, CheckCircleIcon, DocumentTextIcon, BuildingOfficeIcon } from '@heroicons/vue/24/outline';
@@ -7,10 +8,7 @@ const props = defineProps({
     recentQuotes: Array
 });
 
-// Keep legacy demo links working while honoring real checkout links.
-const paymentHref = (invoice) => invoice.payment_url?.includes('/api/mock/payment/')
-    ? `/api/mock/payment/invoice/${invoice.id}`
-    : invoice.payment_url;
+const paymentHref = (invoice) => route('invoices.checkout', invoice.id);
 
 const getStatusColor = (status) => {
     switch (status) {
@@ -99,13 +97,13 @@ const getStatusColor = (status) => {
                                             </span>
                                         </div>
                                         <div class="text-sm text-gray-500 flex items-center gap-4">
-                                            <span class="flex items-center"><ClockIcon class="w-4 h-4 mr-1"/> {{ new Date(quote.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) }}</span>
+                                            <span class="flex items-center"><ClockIcon class="w-4 h-4 mr-1"/> {{ businessDate(quote.created_at, false, $page.props.businessTimezone) }}</span>
                                             <span>{{ quote.items.length }} items requested</span>
                                         </div>
                                     </div>
                                     <div class="text-right flex flex-col items-end">
-                                        <div class="text-xs text-gray-500 font-medium uppercase mb-0.5">Estimated Total</div>
-                                        <div class="text-lg font-bold text-gray-900">₱{{ Number(quote.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}</div>
+                                        <div class="text-xs text-gray-500 font-medium uppercase mb-0.5">{{ quote.invoice ? 'Invoice Total' : 'Estimated Total' }}</div>
+                                        <div class="text-lg font-bold text-gray-900">₱{{ Number(quote.invoice?.total_amount ?? quote.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}</div>
                                         <template v-if="quote.invoice && quote.invoice.status !== 'paid' && quote.invoice.status !== 'on_terms'">
                                             <Link v-if="quote.items && quote.items.reduce((s, i) => s + i.quantity, 0) >= 1000" 
                                                 :href="'/api/invoices/' + quote.invoice.id + '/accept-terms'" 
@@ -113,7 +111,7 @@ const getStatusColor = (status) => {
                                                 class="mt-2 text-xs font-bold bg-jubis-navy hover:bg-[#071126] text-white px-4 py-1.5 rounded-full transition shadow-sm w-full text-center">
                                                 Accept Credit Terms
                                             </Link>
-                                            <a v-else-if="quote.invoice.payment_url" :href="paymentHref(quote.invoice)" class="mt-2 text-xs font-bold bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-full transition shadow-sm w-full text-center inline-block">
+                                            <a v-else :href="paymentHref(quote.invoice)" class="mt-2 text-xs font-bold bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-full transition shadow-sm w-full text-center inline-block">
                                                 Pay via GCash/Card
                                             </a>
                                         </template>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\CompanySettings;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -34,7 +35,9 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'settings' => \Illuminate\Support\Facades\Cache::get('global_settings', []),
+            'settings' => app(CompanySettings::class)->all(),
+            'businessTimezone' => config('company.timezone'),
+            'paymentSimulation' => (bool) config('services.paymongo.simulation'),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),

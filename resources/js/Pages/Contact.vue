@@ -87,9 +87,8 @@ import { MapPinIcon, PhoneIcon, EnvelopeIcon, ClockIcon } from '@heroicons/vue/2
                                 <div class="ml-4">
                                     <h3 class="text-lg font-bold text-gray-900">Head Office</h3>
                                     <p class="text-gray-600 mt-1">
-                                        JUBIS MARKETING<br>
-                                        22 Gonzales Compound, Almanza I,<br>
-                                        Las Pinas City 1750, Philippines
+                                        {{ $page.props.settings.company_name }}<br>
+                                        {{ $page.props.settings.company_address }}
                                     </p>
                                 </div>
                             </div>
@@ -101,8 +100,7 @@ import { MapPinIcon, PhoneIcon, EnvelopeIcon, ClockIcon } from '@heroicons/vue/2
                                 <div class="ml-4">
                                     <h3 class="text-lg font-bold text-gray-900">Phone & Viber</h3>
                                     <p class="text-gray-600 mt-1 flex flex-col space-y-1">
-                                        <span><span class="font-semibold text-gray-700">Tel:</span> (02) 8801-1688</span>
-                                        <span><span class="font-semibold text-gray-700">Viber:</span> 0968-7045013</span>
+                                        <span>{{ $page.props.settings.contact_phone }}</span>
                                     </p>
                                 </div>
                             </div>
@@ -114,7 +112,7 @@ import { MapPinIcon, PhoneIcon, EnvelopeIcon, ClockIcon } from '@heroicons/vue/2
                                 <div class="ml-4">
                                     <h3 class="text-lg font-bold text-gray-900">Email</h3>
                                     <p class="text-gray-600 mt-1">
-                                        <a href="mailto:Jubismarketing@gmail.com" class="hover:text-jubis-red transition">Jubismarketing@gmail.com</a>
+                                        <a :href="`mailto:${$page.props.settings.contact_email}`" class="break-all hover:text-jubis-red transition">{{ $page.props.settings.contact_email }}</a>
                                     </p>
                                 </div>
                             </div>
@@ -139,4 +137,3 @@ import { MapPinIcon, PhoneIcon, EnvelopeIcon, ClockIcon } from '@heroicons/vue/2
         </div>
     </PublicLayout>
 </template>
-

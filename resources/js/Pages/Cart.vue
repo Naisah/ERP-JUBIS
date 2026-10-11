@@ -94,12 +94,12 @@ const submitQuote = () => {
                             
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-gray-600">Subtotal (VAT-Exclusive)</span>
-                                <span class="font-medium text-gray-900">₱{{ Number(cart.subtotal || (cart.total_amount/1.12)).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}</span>
+                                <span class="font-medium text-gray-900">₱{{ Number(cart.subtotal).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}</span>
                             </div>
 
                             <div class="flex justify-between items-center mb-4 pb-4 border-b border-gray-100">
-                                <span class="text-gray-600">12% VAT</span>
-                                <span class="font-medium text-gray-900">₱{{ Number(cart.vat_amount || (cart.total_amount - (cart.total_amount/1.12))).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}</span>
+                                <span class="text-gray-600">{{ cart.vat_rate ?? 12 }}% VAT</span>
+                                <span class="font-medium text-gray-900">₱{{ Number(cart.vat_amount).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}</span>
                             </div>
                             
                             <div class="flex justify-between items-center mb-6">

@@ -44,7 +44,7 @@ const getStatusColor = (status) => {
                 <tbody class="divide-y divide-gray-200 bg-white">
                     <tr v-for="invoice in invoices.data" :key="invoice.id" class="hover:bg-gray-50">
                         <td class="whitespace-nowrap py-4 pl-4 pr-3 font-bold text-gray-900">
-                            INV-{{ String(invoice.quote_id).padStart(5, '0') }}
+                            INV-{{ String(invoice.id).padStart(5, '0') }}
                         </td>
                         <td class="whitespace-nowrap px-3 py-4 text-gray-900">
                             <div class="font-medium">{{ invoice.user?.company_name || invoice.user?.name }}</div>

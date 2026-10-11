@@ -1,4 +1,5 @@
 <script setup>
+import { businessDate } from '@/Utils/businessDate';
 import Pagination from '@/Components/Pagination.vue';
 import { ref, onBeforeUnmount } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
@@ -185,7 +186,7 @@ const getRoleLabel = (role) => {
     </span>
     <span v-else class="text-gray-400 text-xs">�</span>
 </td>
-                            <td class="px-6 py-4 text-sm text-gray-500">{{ new Date(user.created_at).toLocaleDateString() }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-500">{{ businessDate(user.created_at, false, $page.props.businessTimezone) }}</td>
                             <td class="px-6 py-4 text-right text-sm font-medium">
                                 <button @click="openEditModal(user)" class="text-blue-600 hover:text-blue-900 mr-4" title="Edit User">
                                     <PencilSquareIcon class="w-5 h-5 inline" />

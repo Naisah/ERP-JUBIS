@@ -3,8 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Invoice;
+use App\Models\Product;
 use App\Models\Quote;
+use App\Models\StockMovement;
+use App\Services\PayMongoService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class QuoteController extends Controller
@@ -19,15 +24,16 @@ class QuoteController extends Controller
 
         return Inertia::render('Admin/Quotes/Index', [
             'quotes' => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only(['status'])
+            'filters' => $request->only(['status']),
         ]);
     }
 
     public function show(Quote $quote)
     {
         $quote->load(['user', 'items.product']);
+
         return Inertia::render('Admin/Quotes/Show', [
-            'quote' => $quote
+            'quote' => $quote,
         ]);
     }
 
@@ -37,64 +43,44 @@ class QuoteController extends Controller
             'status' => 'required|in:pending,reviewed,approved,rejected',
         ]);
 
-        $oldStatus = $quote->status;
-        $quote->update(['status' => $validated['status']]);
-
-        // AUTOMATION: Stock Rollback on Rejection
-        if ($validated['status'] === 'rejected' && $oldStatus !== 'rejected') {
-            foreach ($quote->items as $item) {
-                if ($item->product) {
-                    $item->product->increment('stock_quantity', $item->quantity);
-                    \App\Models\StockMovement::create([
+        DB::transaction(function () use ($quote, $validated) {
+            $quote = Quote::whereKey($quote->id)->lockForUpdate()->firstOrFail();
+            if ($quote->status === $validated['status']) {
+                return;
+            }
+            abort_unless(in_array($quote->status, ['pending', 'reviewed'], true), 409, 'Approved and rejected quotes cannot be reopened.');
+            if ($validated['status'] === 'rejected') {
+                $products = Product::withTrashed()->whereIn('id', $quote->items->pluck('product_id'))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+                foreach ($quote->items as $item) {
+                    $products[$item->product_id]->increment('stock_quantity', $item->quantity);
+                    StockMovement::create([
                         'product_id' => $item->product_id,
                         'user_id' => auth()->id(),
                         'quantity' => $item->quantity,
                         'type' => 'adjustment',
-                        'reference_id' => 'QUOTE-REJECT-' . $quote->id,
-                        'notes' => 'Stock restored due to rejected quote'
+                        'reference_id' => 'QUOTE-REJECT-'.$quote->id,
+                        'notes' => 'Stock restored due to rejected quote',
                     ]);
                 }
             }
-        }
-
-        // Auto-generate invoice if approved
-        if ($validated['status'] === 'approved') {
-            $quote->load('user');
-            
-            // Check if invoice already exists to prevent duplicates
-            $existingInvoice = \App\Models\Invoice::where('quote_id', $quote->id)->first();
-            
-            if (!$existingInvoice) {
-                \App\Models\Invoice::create([
+            $quote->update(['status' => $validated['status']]);
+            if ($validated['status'] === 'approved') {
+                $invoice = Invoice::firstOrCreate(['quote_id' => $quote->id], [
                     'quote_id' => $quote->id,
                     'user_id' => $quote->user_id,
                     'subtotal' => $quote->subtotal,
                     'vat_amount' => $quote->vat_amount,
+                    'vat_rate' => $quote->vat_rate,
                     'total_amount' => $quote->total_amount,
                     'amount_paid' => 0,
                     'status' => 'unpaid',
-                    'due_date' => now()->addDays(30), // Default Net 30
+                    'due_date' => now()->timezone(config('company.timezone'))->addDays(30)->toDateString(),
                     'billing_address' => $quote->user->billing_address ?? 'Not specified',
                 ]);
+                app(PayMongoService::class)->syncPaymentLink($invoice);
             }
-            
-            // AUTOMATION: Generate PayMongo Checkout Link
-            try {
-                $paymongo = app(\App\Services\PayMongoService::class);
-                $link = $paymongo->createPaymentLink($existingInvoice ?? \App\Models\Invoice::where('quote_id', $quote->id)->first());
-                if ($link && isset($link['checkout_url'])) {
-                    \App\Models\Invoice::where('quote_id', $quote->id)->update([
-                        'payment_url' => $link['checkout_url'],
-                        'payment_reference_id' => $link['id'] ?? null
-                    ]);
-                }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('PayMongo Auto-Generation Failed: ' . $e->getMessage());
-            }
-        }
+        });
 
         return redirect()->back()->with('success', 'Quote status updated.');
     }
 }
-
-

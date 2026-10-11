@@ -18,6 +18,7 @@ const form = useForm({
     category_id: props.product.category_id,
     wholesale_price: props.product.wholesale_price,
     stock_quantity: props.product.stock_quantity,
+    original_stock_quantity: props.product.stock_quantity,
     unit_of_measure: props.product.unit_of_measure || 'pcs',
     description: props.product.description || '',
     image: null
@@ -170,5 +171,4 @@ const submit = () => {
         </form>
     </AdminLayout>
 </template>
-
 

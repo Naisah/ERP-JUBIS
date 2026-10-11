@@ -33,7 +33,7 @@ const brands = [
                         </div>
                     </div>
                     <div class="bg-gray-100 rounded-xl h-80 flex items-center justify-center p-8 text-center border-4 border-gray-50 border-t-jubis-gold shadow-inner">
-                        <p class="text-gray-400 font-bold uppercase tracking-widest">[Warehouse / Office Image]</p>
+                        <img src="/images/logo.png" alt="Jubis Marketing" class="max-w-full max-h-64 object-contain" />
                     </div>
                 </div>
 

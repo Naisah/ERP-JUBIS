@@ -59,27 +59,29 @@
     </style>
 </head>
 <body>
+    @php($company = app(\App\Services\CompanySettings::class)->all())
     <div class="header">
         <div class="header-left">
             <img src="{{ public_path('images/logo.png') }}" style="max-height: 80px; margin-bottom: 15px;">
             <div style="color: #64748b; line-height: 1.5; font-size: 12px;">
-                <strong>JUBIS MARKETING</strong><br>
-                123 Warehouse Avenue<br>
-                Makati City, Metro Manila 1200<br>
-                VAT Reg. TIN: 123-456-789-000
+                <strong>{{ $company['company_name'] }}</strong><br>
+                {{ $company['company_address'] }}<br>
+                @if(!empty($company['tax_id']))
+                    TIN: {{ $company['tax_id'] }}
+                @endif
             </div>
         </div>
         <div class="header-right">
-            <h2 class="invoice-title">TAX INVOICE</h2>
+            <h2 class="invoice-title">INVOICE</h2>
             <div class="invoice-details">
                 <table style="width: 100%; text-align: right;">
                     <tr>
                         <td style="color: #64748b; padding-bottom: 5px;">Invoice No:</td>
-                        <td style="font-weight: bold; color: #0f172a; padding-bottom: 5px;">INV-{{ str_pad($invoice->quote_id, 5, '0', STR_PAD_LEFT) }}</td>
+                        <td style="font-weight: bold; color: #0f172a; padding-bottom: 5px;">INV-{{ str_pad($invoice->id, 5, '0', STR_PAD_LEFT) }}</td>
                     </tr>
                     <tr>
                         <td style="color: #64748b; padding-bottom: 5px;">Date Issued:</td>
-                        <td style="font-weight: bold; color: #0f172a; padding-bottom: 5px;">{{ $invoice->created_at->format('M d, Y') }}</td>
+                        <td style="font-weight: bold; color: #0f172a; padding-bottom: 5px;">{{ $invoice->created_at->copy()->timezone(config('company.timezone'))->format('M d, Y') }}</td>
                     </tr>
                     <tr>
                         <td style="color: #64748b; padding-bottom: 15px;">Due Date:</td>
@@ -118,6 +120,11 @@
                 <div style="margin-top: 5px; color: #475569;">
                     {{ $invoice->shipments->first()->shipping_address }}
                 </div>
+                @if($invoice->shipments->first()->delivery_fee > 0 && $invoice->shipping_amount == 0)
+                    <div style="margin-top: 5px; color: #475569; font-size: 11px;">
+                        Courier estimate: PHP {{ number_format($invoice->shipments->first()->delivery_fee, 2) }} (not included in this invoice).
+                    </div>
+                @endif
             </div>
             @endif
         </div>
@@ -136,12 +143,12 @@
             @foreach($invoice->quote->items as $item)
             <tr>
                 <td>
-                    <strong style="display: block; margin-bottom: 3px;">{{ $item->product->name }}</strong>
-                    <span style="color: #64748b; font-size: 11px;">SKU: {{ $item->product->sku }}</span>
+                    <strong style="display: block; margin-bottom: 3px;">{{ $item->product?->name ?? 'Archived product' }}</strong>
+                    <span style="color: #64748b; font-size: 11px;">SKU: {{ $item->product?->sku ?? $item->product_id }}</span>
                 </td>
-                <td class="text-center">{{ $item->quantity }} {{ $item->product->unit_of_measure }}</td>
-                <td class="text-right">PHP {{ number_format($item->unit_price ?? 0, 2) }}</td>
-                <td class="text-right">PHP {{ number_format($item->total_price ?? 0, 2) }}</td>
+                <td class="text-center">{{ $item->quantity }} {{ $item->product?->unit_of_measure }}</td>
+                <td class="text-right">PHP {{ number_format($item->quoted_price, 2) }}</td>
+                <td class="text-right">PHP {{ number_format($item->quantity * $item->quoted_price, 2) }}</td>
             </tr>
             @endforeach
         </tbody>
@@ -162,21 +169,21 @@
         <div class="totals-right">
             <div class="total-row">
                 <div class="total-label">Subtotal (VAT-Exclusive)</div>
-                <div class="total-value">PHP {{ number_format($invoice->subtotal ?: ($invoice->total_amount / 1.12), 2) }}</div>
+                <div class="total-value">PHP {{ number_format($invoice->subtotal, 2) }}</div>
             </div>
             <div class="total-row">
-                <div class="total-label">12% VAT</div>
-                <div class="total-value">PHP {{ number_format($invoice->vat_amount ?: ($invoice->total_amount - ($invoice->total_amount / 1.12)), 2) }}</div>
+                <div class="total-label">{{ number_format($invoice->vat_rate, 2) }}% VAT</div>
+                <div class="total-value">PHP {{ number_format($invoice->vat_amount, 2) }}</div>
             </div>
-            @if($invoice->shipments->first() && $invoice->shipments->first()->delivery_fee > 0)
+            @if($invoice->shipping_amount > 0)
             <div class="total-row">
                 <div class="total-label">Shipping & Handling</div>
-                <div class="total-value">PHP {{ number_format($invoice->shipments->first()->delivery_fee, 2) }}</div>
+                <div class="total-value">PHP {{ number_format($invoice->shipping_amount, 2) }}</div>
             </div>
             @endif
             <div class="total-row grand-total">
-                <div class="total-label"><strong>TOTAL DUE</strong></div>
-                <div class="total-value"><strong>PHP {{ number_format($invoice->total_amount + ($invoice->shipments->first()->delivery_fee ?? 0), 2) }}</strong></div>
+                <div class="total-label"><strong>INVOICE TOTAL</strong></div>
+                <div class="total-value"><strong>PHP {{ number_format($invoice->total_amount, 2) }}</strong></div>
             </div>
             
             @if($invoice->amount_paid > 0)
@@ -186,14 +193,14 @@
             </div>
             <div class="total-row" style="border-top: 1px solid #e2e8f0; padding-top: 8px;">
                 <div class="total-label"><strong>Remaining Balance</strong></div>
-                <div class="total-value"><strong>PHP {{ number_format(($invoice->total_amount + ($invoice->shipments->first()->delivery_fee ?? 0)) - $invoice->amount_paid, 2) }}</strong></div>
+                <div class="total-value"><strong>PHP {{ number_format($invoice->balance_due, 2) }}</strong></div>
             </div>
             @endif
         </div>
     </div>
 
     <footer>
-        <strong>Jubis Marketing</strong> &bull; 123 Warehouse Avenue, Makati City &bull; +63 (2) 8123 4567 &bull; sales@jubismarketing.com<br>
+        <strong>{{ $company['company_name'] }}</strong> &bull; {{ $company['contact_phone'] }} &bull; {{ $company['contact_email'] }}<br>
         
     </footer>
 </body>

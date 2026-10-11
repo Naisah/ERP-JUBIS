@@ -1,0 +1,12 @@
+{
+  "scenario":"CON-01 Two independent clients compete for the last five units",
+  "baseURL":"http://127.0.0.1:8080",
+  "preparation":"Use multi-worker MySQL8 staging, not php artisan serve or the SQLite browser server. Create SKU QA-RACE with stock5, and a draft cart of quantity4 for each client. Replace fixture IDs and search as needed. Prepare authenticated Cookie and decoded XSRF-TOKEN values in the named environment variables. Run once per fresh fixture.",
+  "requests":[
+    {"label":"Client A submit","method":"POST","path":"/cart/submit","actor":{"cookieEnv":"QA_CLIENT_A_COOKIE","csrfEnv":"QA_CLIENT_A_XSRF"},"body":{"shipping_address":"QA"},"allowedStatuses":[302]},
+    {"label":"Client B submit","method":"POST","path":"/cart/submit","actor":{"cookieEnv":"QA_CLIENT_B_COOKIE","csrfEnv":"QA_CLIENT_B_XSRF"},"body":{"shipping_address":"QA"},"allowedStatuses":[302]}
+  ],
+  "observations":[
+    {"label":"Exactly one reservation of four units","path":"/admin/inventory?search=QA-RACE","actor":{"cookieEnv":"QA_WAREHOUSE_COOKIE","csrfEnv":"QA_WAREHOUSE_XSRF"},"valuePath":"props.products.data","find":{"field":"sku","value":"QA-RACE","read":"stock_quantity"},"before":5,"after":1}
+  ]
+}
