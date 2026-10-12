@@ -14,7 +14,7 @@ Verified 12 October 2026 after application fixes and presentation configuration 
 | Delivery tracking map | Loads with clear demo labels; no actual driver location or dispatch. |
 | Invoice PDF | Correct item, VAT, shipping, paid amount and zero balance; rendered page has no clipping. |
 | Stock and reports | One stock reservation per submitted unit; payment does not deduct stock again. Dashboard/report cash totals agree. |
-| Email notification | Approved Gmail SMTP configuration is deployed. QA shipment email was accepted for sending; Inbox/Spam receipt still awaits owner confirmation. |
+| Email notification | Approved Gmail SMTP configuration is deployed. Owner confirmed the processing/demo shipment email arrived in Gmail Inbox and supplied a screenshot. |
 
 ## Rehearsed demonstration
 
@@ -30,7 +30,7 @@ Verified 12 October 2026 after application fixes and presentation configuration 
 
 - [ ] Use the hosted Laravel Cloud address, not localtunnel.
 - [ ] Confirm both supplied accounts can sign in in the presentation browser.
-- [ ] Confirm the QA email titled “Demo shipment created — Jubis Marketing (#4)” arrived in Inbox or Spam.
+- [x] Owner confirmed the QA email titled “Demo shipment created — Jubis Marketing (#4)” arrived in Gmail Inbox.
 - [ ] Keep other customers' invoices and real payment details out of the demonstration.
 - [ ] Have the verified PDF and screenshots in local `qa/results/fixes-2026-10-12/presentation/` available if connectivity drops.
 - [ ] Explain that the rehearsed QA records affect demo totals: INV-00004 added 450.00 simulated paid revenue, reserved one additional unit, and created one processing demo shipment. THHN-2.0 stock is now 148; total recorded demo cash is 590.00 across the two paid QA invoices.
@@ -40,6 +40,6 @@ Do not replay payment on INV-00003 or INV-00004. Older unpaid invoices remain un
 
 ## Remaining production work
 
-Real PayMongo settlement/provider webhooks, automatic real courier booking, forced MySQL concurrency/load, and provider delivery acceptance still require separate verification. The current Lalamove integration supports presentation simulation and manually entered booking/tracking; adding API keys alone will not implement automatic dispatch. Procurement and RMA have automated local coverage, but their complete hosted business workflows were not exercised in this presentation rehearsal.
+The owner confirmed courier simulation and test payments are intentional for this demo. Actual dispatch and live-money settlement are outside presentation scope. The hosted rehearsal used the application's payment simulator; PayMongo's own test checkout and provider-originated webhook still require a separate sandbox check if that integration is to be demonstrated. Forced MySQL concurrency/load also remains unverified. Procurement and RMA have automated local coverage, but their complete hosted business workflows were not exercised in this presentation rehearsal.
 
 Demo payment/tracking flags are deliberately enabled for the presentation. Disable them before treating this environment as real business accounting.

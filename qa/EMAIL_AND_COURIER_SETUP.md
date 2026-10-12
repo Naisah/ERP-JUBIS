@@ -6,6 +6,8 @@ Presentation demo checkout and illustrative tracking can run without provider cr
 
 The owner approved reusing the existing local Gmail SMTP setup on 12 October 2026. Its nine mail settings were copied privately into Cloud shared secrets linked only to `Jubis-Marketing · production`. No password or sender login is stored in GitHub. This avoided opening or replacing existing application/database credentials. Deployment and a labelled shipment notification are verified in [DEPLOYED_RETEST_REPORT.md](DEPLOYED_RETEST_REPORT.md).
 
+The owner confirmed the processing/demo shipment message arrived in Gmail Inbox and supplied a screenshot. That delivery case passes. Courier simulation is explicitly the intended presentation behavior; actual dispatch is outside this demo's scope.
+
 For an approved Gmail sender, use this configuration as a template:
 
 | Key | Value |

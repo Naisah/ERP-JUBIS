@@ -1,6 +1,6 @@
 # Jubis Marketing ERP QA pack
 
-**Current fixes/retest:** [FIX_REPORT.md](FIX_REPORT.md). **Presentation route:** [PRESENTATION_CHECKLIST.md](PRESENTATION_CHECKLIST.md). **Publishing steps:** [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md). Application fixes, demo configuration and approved SMTP settings are deployed; see [DEPLOYED_RETEST_REPORT.md](DEPLOYED_RETEST_REPORT.md) for hosted payment/map/PDF checks, email acceptance and remaining provider verification.
+**Current fixes/retest:** [FIX_REPORT.md](FIX_REPORT.md). **Presentation route:** [PRESENTATION_CHECKLIST.md](PRESENTATION_CHECKLIST.md). **Publishing steps:** [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md). Application fixes, demo configuration and approved SMTP settings are deployed; see [DEPLOYED_RETEST_REPORT.md](DEPLOYED_RETEST_REPORT.md) for hosted payment/map/PDF checks, confirmed Gmail delivery and remaining provider verification.
 
 Start with [TEST_STRATEGY.md](TEST_STRATEGY.md), [FUNCTIONAL_SCENARIOS.md](FUNCTIONAL_SCENARIOS.md), [ENDPOINT_MATRIX.csv](ENDPOINT_MATRIX.csv), and [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md). [EXECUTION_REPORT.md](EXECUTION_REPORT.md) records what actually ran; [KNOWN_FINDINGS.md](KNOWN_FINDINGS.md) lists reproducible release defects.
 

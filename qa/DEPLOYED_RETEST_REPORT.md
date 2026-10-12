@@ -28,7 +28,7 @@ Local validation before publication: **391 automated tests passed, 1,662 asserti
 ## Presentation configuration follow-up
 
 - The owner subsequently approved enabling demo tools. `PAYMENT_SIMULATION_ENABLED=true` and `LOGISTICS_SIMULATION_ENABLED=true` were added as separate Cloud shared settings linked only to this environment. Deployment 12 completed successfully without opening or changing existing application/database credentials. Hosted GCash and tracking checks now pass. Do not describe the map as real driver tracking or demo checkout as payment settlement.
-- The owner explicitly approved copying the existing local Gmail SMTP setup. Nine mail settings were saved privately as shared secrets linked only to this environment. Deployment 14 (`97808adc915235b077d32128a96e4c6ab1ba8ae8`) reports **Deployed**, with build, deploy and routing finished in 1m38s. The labelled QA shipment notification returned **Notification accepted for sending** with SMTP enabled. Independent Inbox/Spam receipt is awaiting the owner's confirmation; acceptance alone is not delivery proof. No credentials were committed.
+- The owner explicitly approved copying the existing local Gmail SMTP setup. Nine mail settings were saved privately as shared secrets linked only to this environment. Deployment 14 (`97808adc915235b077d32128a96e4c6ab1ba8ae8`) reports **Deployed**, with build, deploy and routing finished in 1m38s. The labelled QA shipment notification returned **Notification accepted for sending** with SMTP enabled. The owner subsequently confirmed actual Gmail Inbox receipt and supplied a screenshot of the processing/demo notification. Email delivery passes for this case. No credentials were committed.
 - Real automated courier booking remains unavailable; manually booked tracking numbers are supported. Real PayMongo sandbox settlement/provider-originated webhook verification remains separate.
 
 The browser-native quote confirmation stalled this test browser. It was replaced with an accessible in-page confirmation retaining Submit/Cancel and Remove/Cancel choices, published in commit `97808ad` and deployed in deployment 13. Local browser cancellation kept the draft, and confirmed submission produced exactly one pending one-unit quote with stock 100 -> 99. The production frontend build passed. On the host, Submit/Cancel and Remove/Cancel both kept a temporary draft item; confirming Remove emptied the cart. This check left an empty draft QTE-00005 and created no additional submitted quote, invoice or stock reservation.
@@ -39,7 +39,7 @@ The browser-native quote confirmation stalled this test browser. It was replaced
 |---|---|
 | QA quote and approval | QTE-00004 contains one THHN-2.0 unit and explicit QA/no dispatch/no charge notes. Approval created one INV-00004 for 125.00 goods + 15.00 VAT. |
 | New simulated shipment | One processing shipment; clearly identified as simulated, no real courier dispatched. Fee 310.00 added once; invoice total became 450.00. |
-| SMTP notification | Real SMTP transport accepted the demo shipment message to the approved client test address. Inbox confirmation remains pending. |
+| SMTP notification | Real SMTP transport accepted the demo shipment message to the approved client test address. Owner confirmed Gmail Inbox receipt with a screenshot. |
 | New tracking link | Opens an OpenStreetMap map with Demo Delivery Tracking, Processing, and no live driver/arrival claim. |
 | Hosted GCash checkout | Selected GCash, continued without card fields, paid 450.00 in the simulator. Dashboard confirms Payment Complete and no real money charged. |
 | Reopening paid checkout | Redirects to the client dashboard with an already-paid warning; payment controls are unavailable. |
@@ -49,6 +49,12 @@ The browser-native quote confirmation stalled this test browser. It was replaced
 | Reports and stock ledger | Reports cash also 590.00; top seller THHN-2.0 is two units / 250.00 goods revenue across the two paid QA invoices. Stock ledger contains one -1 entry for QUOTE-4, attributed to the client. |
 
 These authorized QA records affect hosted presentation totals and reserve one additional unit. They are not real sales, real payment settlement or actual delivery bookings. Do not replay payment on INV-00003 or INV-00004, or process older customer invoices during a demonstration.
+
+## Email branding and demo scope follow-up
+
+The owner confirmed Gmail Inbox delivery, requested the website logo in place of the text email header, and clarified that courier simulation and test payments are intentional. Both shipment-created and shipment-delivered templates now share the existing website logo as an inline PNG. Isolated mail rendering verified that each MIME message contains the actual logo bytes with a matching content-ID reference, without depending on a public image URL. Browser previews of both templates were checked. Existing received messages retain their original content; the change applies to newly sent emails.
+
+The hosted GCash run above verified the ERP's built-in simulator. PayMongo test mode is suitable for a demo and does not require live-money transactions, but checking PayMongo's own sandbox checkout and signed payment notification is separate from the built-in simulator. Real courier dispatch and live payment settlement are outside the owner's presentation scope.
 
 See [EMAIL_AND_COURIER_SETUP.md](EMAIL_AND_COURIER_SETUP.md) for credential entry and provider acceptance requirements.
 

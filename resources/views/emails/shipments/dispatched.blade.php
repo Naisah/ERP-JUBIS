@@ -5,7 +5,6 @@
         body { font-family: Arial, sans-serif; background-color: #f9fafb; margin: 0; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .header { border-bottom: 2px solid #f3f4f6; padding-bottom: 20px; margin-bottom: 20px; text-align: center; }
-        .logo { color: #1e3a8a; font-size: 24px; font-weight: bold; text-decoration: none; }
         .content { color: #374151; line-height: 1.6; }
         .tracking-box { background: #f3f4f6; padding: 15px; border-radius: 6px; text-align: center; margin: 25px 0; border: 1px solid #e5e7eb; }
         .button { display: inline-block; background-color: #f97316; color: #ffffff; text-decoration: none; font-weight: bold; padding: 12px 24px; border-radius: 6px; margin-top: 10px; }
@@ -15,7 +14,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <span class="logo">JUBIS MARKETING ERP</span>
+            @include('emails.partials.logo')
         </div>
         
         <div class="content">
