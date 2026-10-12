@@ -14,7 +14,7 @@ Verified 12 October 2026 after application fixes and presentation configuration 
 | Delivery tracking map | Loads with clear demo labels; no actual driver location or dispatch. |
 | Invoice PDF | Correct item, VAT, shipping, paid amount and zero balance; rendered page has no clipping. |
 | Stock and reports | One stock reservation per submitted unit; payment does not deduct stock again. Dashboard/report cash totals agree. |
-| Email notification | Approved Gmail SMTP configuration is deployed. Owner confirmed the processing/demo shipment email arrived in Gmail Inbox and supplied a screenshot. |
+| Email notification | Approved Gmail SMTP configuration is deployed. Owner confirmed Gmail Inbox delivery and that the website logo displays correctly in the new follow-up email. |
 
 ## Rehearsed demonstration
 

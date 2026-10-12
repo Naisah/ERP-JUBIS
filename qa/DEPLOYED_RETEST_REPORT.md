@@ -54,6 +54,8 @@ These authorized QA records affect hosted presentation totals and reserve one ad
 
 The owner confirmed Gmail Inbox delivery, requested the website logo in place of the text email header, and clarified that courier simulation and test payments are intentional. Both shipment-created and shipment-delivered templates now share the existing website logo as an inline PNG. Isolated mail rendering verified that each MIME message contains the actual logo bytes with a matching content-ID reference, without depending on a public image URL. Browser previews of both templates were checked. Existing received messages retain their original content; the change applies to newly sent emails.
 
+The logo update was published in `c0a7fa6f32b13a4a6cdd15573f07c333fc5fcaa8`; Cloud deployment 16 finished successfully in 1m40s. A labelled follow-up notification for the existing simulated QA shipment was accepted by SMTP, with no database mutations. The owner confirmed the logo displays correctly in the new Gmail message. Runtime metadata also confirmed that the current hosted payment mode is `ERP_SIMULATOR`; no provider key was displayed.
+
 The hosted GCash run above verified the ERP's built-in simulator. PayMongo test mode is suitable for a demo and does not require live-money transactions, but checking PayMongo's own sandbox checkout and signed payment notification is separate from the built-in simulator. Real courier dispatch and live payment settlement are outside the owner's presentation scope.
 
 See [EMAIL_AND_COURIER_SETUP.md](EMAIL_AND_COURIER_SETUP.md) for credential entry and provider acceptance requirements.
