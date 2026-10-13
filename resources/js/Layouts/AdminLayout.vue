@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import FormFeedback from '@/Components/FormFeedback.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { 
@@ -37,11 +37,11 @@ const allNavigation = [
     { name: 'Logistics & Dispatch', href: route('admin.shipments.index'), icon: TruckIcon, current: route().current('admin.shipments.*'), roles: ['warehouse', 'purchasing'] },
     { name: 'User Management', href: route('admin.users.index'), icon: UsersIcon, current: route().current('admin.users.*'), roles: [] },
     { name: 'Reports & Analytics', href: route('admin.reports.index'), icon: ChartBarIcon, current: route().current('admin.reports.*'), roles: ['finance'] },
-    { name: 'Returns / RMAs', href: route('admin.rmas.index'), icon: DocumentTextIcon, current: route().current('admin.rmas.*'), roles: ['finance'] },
     { name: 'Settings', href: route('admin.settings'), icon: Cog6ToothIcon, current: route().current('admin.settings'), roles: [] },
 ];
 
 const navigation = allNavigation.filter(item => isSuper || item.roles.includes(role));
+const sectionTitle = computed(() => allNavigation.find(item => isCurrent(item.href))?.name || 'Dashboard');
 </script>
 
 <template>
@@ -105,7 +105,7 @@ const navigation = allNavigation.filter(item => isSuper || item.roles.includes(r
             <header class="h-20 bg-white shadow-sm border-b border-gray-200 flex items-center justify-between gap-3 px-4 sm:px-8 z-10">
                 <button class="lg:hidden border rounded px-3 py-2 text-sm" :aria-expanded="menuOpen" aria-controls="admin-navigation" @click="menuOpen = !menuOpen">Menu</button>
                 <h1 class="text-lg sm:text-2xl font-extrabold text-jubis-navy tracking-tight">
-                    <slot name="header">Dashboard</slot>
+                    <slot name="header">{{ sectionTitle }}</slot>
                 </h1>
                 
                 <div class="hidden sm:flex items-center space-x-4">
