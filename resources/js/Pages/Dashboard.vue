@@ -9,6 +9,7 @@ const props = defineProps({
 });
 
 const paymentHref = (invoice) => route('invoices.checkout', invoice.id);
+const balanceDue = (invoice) => Number(invoice.balance_due ?? Math.max(0, Number(invoice.total_amount) - Number(invoice.amount_paid)));
 
 const getStatusColor = (status) => {
     switch (status) {
@@ -104,18 +105,22 @@ const getStatusColor = (status) => {
                                     <div class="text-right flex flex-col items-end">
                                         <div class="text-xs text-gray-500 font-medium uppercase mb-0.5">{{ quote.invoice ? 'Invoice Total' : 'Estimated Total' }}</div>
                                         <div class="text-lg font-bold text-gray-900">₱{{ Number(quote.invoice?.total_amount ?? quote.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}</div>
-                                        <template v-if="quote.invoice && quote.invoice.status !== 'paid' && quote.invoice.status !== 'on_terms'">
-                                            <Link v-if="quote.items && quote.items.reduce((s, i) => s + i.quantity, 0) >= 1000" 
+                                        <div v-if="quote.invoice && Number(quote.invoice.amount_paid) > 0 && balanceDue(quote.invoice) > 0" class="mt-1 text-xs text-gray-600">
+                                            Paid ₱{{ Number(quote.invoice.amount_paid).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}
+                                            <span class="block font-semibold text-amber-700">Remaining balance: ₱{{ balanceDue(quote.invoice).toLocaleString('en-PH', {minimumFractionDigits: 2}) }}</span>
+                                        </div>
+                                        <template v-if="quote.invoice && balanceDue(quote.invoice) > 0 && quote.invoice.status !== 'on_terms'">
+                                            <Link v-if="quote.invoice.status === 'unpaid' && Number(quote.invoice.amount_paid) === 0 && quote.items && quote.items.reduce((s, i) => s + i.quantity, 0) >= 1000"
                                                 :href="'/api/invoices/' + quote.invoice.id + '/accept-terms'" 
                                                 method="post" as="button" type="button" @click="e => { if (!confirm('Are you sure you want to commit to these Net-30 financial terms? This is a legally binding B2B agreement.')) e.preventDefault(); }"
                                                 class="mt-2 text-xs font-bold bg-jubis-navy hover:bg-[#071126] text-white px-4 py-1.5 rounded-full transition shadow-sm w-full text-center">
                                                 Accept Credit Terms
                                             </Link>
                                             <a v-else :href="paymentHref(quote.invoice)" class="mt-2 text-xs font-bold bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-full transition shadow-sm w-full text-center inline-block">
-                                                Pay via GCash/Card
+                                                {{ Number(quote.invoice.amount_paid) > 0 ? 'Pay remaining balance' : 'Pay via GCash/Card/QR Ph' }}
                                             </a>
                                         </template>
-                                        <div v-else-if="quote.invoice && quote.invoice.status === 'on_terms'" class="mt-2 text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200 px-4 py-1.5 rounded-full shadow-sm text-center">
+                                        <div v-else-if="quote.invoice && balanceDue(quote.invoice) > 0 && quote.invoice.status === 'on_terms'" class="mt-2 text-xs font-bold bg-purple-100 text-purple-800 border border-purple-200 px-4 py-1.5 rounded-full shadow-sm text-center">
                                             ON CREDIT (NET-30)
                                         </div>
                                         <a v-if="quote.invoice" :href="'/invoices/' + quote.invoice.id + '/pdf'" target="_blank" class="mt-2 text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-1.5 rounded-full transition shadow-sm flex items-center justify-center">
@@ -124,7 +129,7 @@ const getStatusColor = (status) => {
                                               </svg>
                                               Download PDF Invoice
                                           </a>
-                                          <span v-if="quote.invoice && quote.invoice.status === 'paid'" class="mt-2 text-xs font-bold text-green-600 flex items-center">
+                                          <span v-if="quote.invoice && balanceDue(quote.invoice) === 0" class="mt-2 text-xs font-bold text-green-600 flex items-center">
                                             <CheckCircleIcon class="w-4 h-4 mr-1" /> Payment Complete
                                         </span>
                                         

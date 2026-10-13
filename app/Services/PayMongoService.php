@@ -13,10 +13,14 @@ class PayMongoService
     /**
      * Create a PayMongo Payment Link for an Invoice
      */
-    public function createPaymentLink(Invoice $invoice)
+    public function createPaymentLink(Invoice $invoice, bool $requireTest = false)
     {
         // Check if API key is configured. If not, simulate the API call for demo purposes.
         $apiKey = config('services.paymongo.secret_key');
+
+        if ($requireTest && ! str_starts_with((string) $apiKey, 'sk_test_')) {
+            return ['success' => false, 'error' => 'PayMongo QR Ph test checkout is not configured.'];
+        }
 
         if (! $apiKey) {
             if (! config('services.paymongo.simulation')) {
@@ -56,12 +60,20 @@ class PayMongoService
                     ],
                 ]);
 
-            if ($response->successful() && $response->json('data.id') && $response->json('data.attributes.checkout_url')) {
+            if ($response->successful() && $response->json('data.id') && $response->json('data.attributes.checkout_url')
+                && (! $requireTest || $response->json('data.attributes.livemode') === false)) {
                 $data = $response->json();
+
+                $checkoutUrl = $data['data']['attributes']['checkout_url'];
+                $checkoutHost = parse_url($checkoutUrl, PHP_URL_HOST);
+                if ($requireTest && (parse_url($checkoutUrl, PHP_URL_SCHEME) !== 'https'
+                    || ! in_array($checkoutHost, ['pm.link', 'checkout.paymongo.com'], true))) {
+                    return ['success' => false, 'error' => 'PayMongo returned an invalid test checkout address.'];
+                }
 
                 return [
                     'success' => true,
-                    'checkout_url' => $data['data']['attributes']['checkout_url'],
+                    'checkout_url' => $checkoutUrl,
                     'reference_id' => $data['data']['id'],
                 ];
             }
@@ -77,9 +89,9 @@ class PayMongoService
         }
     }
 
-    public function syncPaymentLink(Invoice $invoice): bool
+    public function syncPaymentLink(Invoice $invoice, bool $requireTest = false): bool
     {
-        $link = $this->createPaymentLink($invoice);
+        $link = $this->createPaymentLink($invoice, $requireTest);
         if (! ($link['success'] ?? false)) {
             return false;
         }

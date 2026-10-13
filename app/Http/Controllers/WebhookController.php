@@ -68,6 +68,9 @@ class WebhookController extends Controller
         if (Money::cents($invoice->balance_due) === 0) {
             return redirect()->route('dashboard')->with('error', 'This invoice has already been paid.');
         }
+        if (config('services.paymongo.simulation')) {
+            return redirect('/api/mock/payment/invoice/'.$invoice->id);
+        }
         $success = DB::transaction(function () use ($invoice) {
             $invoice = Invoice::whereKey($invoice->id)->lockForUpdate()->firstOrFail();
             if (Money::cents($invoice->balance_due) === 0) {
@@ -110,7 +113,7 @@ class WebhookController extends Controller
         $invoice = Invoice::findOrFail($id);
         abort_unless($invoice->user_id === $request->user()->id, 403);
         $request->validate(['payment_method' => 'required|in:card,gcash,qrph', 'expected_balance' => 'nullable|numeric|decimal:0,2']);
-        DB::transaction(function () use ($invoice, $request) {
+        $checkoutUrl = DB::transaction(function () use ($invoice, $request) {
             $invoice = Invoice::whereKey($invoice->id)->lockForUpdate()->firstOrFail();
             if (Money::cents($invoice->balance_due) === 0) {
                 return;
@@ -118,11 +121,24 @@ class WebhookController extends Controller
             if ($request->filled('expected_balance')) {
                 abort_unless(Money::cents($request->expected_balance) === Money::cents($invoice->balance_due), 409, 'Invoice balance has changed. Please reopen checkout.');
             }
+            if ($request->payment_method === 'qrph') {
+                if (! app(PayMongoService::class)->syncPaymentLink($invoice, true)) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'payment_method' => 'PayMongo QR Ph test checkout is unavailable. Please try again or choose another demo method.',
+                    ]);
+                }
+
+                return $invoice->payment_url;
+            }
             app(InvoicePayments::class)->record(
                 $invoice, Money::cents($invoice->balance_due), 'simulation',
                 'simulation:'.$invoice->id.':'.Money::cents($invoice->total_amount), $request->user()->id
             );
         });
+
+        if ($checkoutUrl) {
+            return redirect()->away($checkoutUrl);
+        }
 
         return redirect()->route('dashboard')->with('success', 'Demo payment completed. No real money was charged.');
     }

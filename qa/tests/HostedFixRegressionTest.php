@@ -53,7 +53,7 @@ class HostedFixRegressionTest extends IsolatedTestCase
         $this->assertSame('paid', $invoice->fresh()->status); $this->assertEquals(224, $invoice->fresh()->amount_paid);
         $this->assertDatabaseCount('payment_events', 1);
     }
-    public static function paymentMethods(): array { return [['card'], ['gcash'], ['qrph']]; }
+    public static function paymentMethods(): array { return [['card'], ['gcash']]; }
 
     public function test_simulators_are_disabled_when_configuration_is_off(): void
     {

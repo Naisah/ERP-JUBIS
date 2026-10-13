@@ -27,6 +27,9 @@
             Jubis Marketing
         </h1>
         <p class="text-slate-500 text-sm mt-1 font-medium">Demo checkout — no real money will be charged</p>
+        @if ($errors->any())
+            <p role="alert" class="mt-3 text-sm text-red-700">{{ $errors->first() }}</p>
+        @endif
     </div>
 
     <div class="max-w-md w-full glass-panel rounded-2xl shadow-2xl overflow-hidden border border-gray-100 relative transition-all duration-300">
@@ -256,7 +259,7 @@
             setCardFields(selectedMethod === 'card');
 
             if (selectedMethod === 'qrph') {
-                // Submit directly for QR Ph (redirects to live API)
+                // The server opens PayMongo test checkout; payment is recorded only after a verified notification.
                 document.getElementById('main-form').requestSubmit();
                 return;
             }
